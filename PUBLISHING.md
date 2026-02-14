@@ -2,6 +2,17 @@
 
 Schritt-für-Schritt-Anleitung zur Veröffentlichung der App im Google Play Store.
 
+## Was ist Capacitor?
+
+[Capacitor](https://capacitorjs.com/) verpackt die bestehende Web-App (Vite + React) in eine native Android-Hülle. Beim Build wird das fertige `dist/`-Verzeichnis in eine echte Android-App eingebettet, die über den Play Store installiert werden kann.
+
+Dieser Ansatz ist ideal, weil:
+
+- Die App **keine Server-Komponente** braucht — alles läuft lokal im Browser-Speicher
+- **Kein Code-Umbau nötig** — die bestehende Web-App wird 1:1 übernommen
+- Die App funktioniert **komplett offline** nach der Installation
+- Updates erfordern einen neuen AAB-Upload im Play Store (im Gegensatz zu einer TWA, die eine gehostete Website lädt)
+
 ---
 
 ## Inhaltsverzeichnis
@@ -14,11 +25,14 @@ Schritt-für-Schritt-Anleitung zur Veröffentlichung der App im Google Play Stor
 6. [Google Play Developer Account](#6-google-play-developer-account)
 7. [App in der Play Console anlegen](#7-app-in-der-play-console-anlegen)
 8. [Store Listing ausfüllen](#8-store-listing-ausfüllen)
-9. [Inhaltsbewertung (IARC)](#9-inhaltsbewertung-iarc)
-10. [Datenschutzerklärung](#10-datenschutzerklärung)
-11. [Release hochladen & testen](#11-release-hochladen--testen)
-12. [Veröffentlichung](#12-veröffentlichung)
-13. [Updates veröffentlichen](#13-updates-veröffentlichen)
+9. [Pflichtangaben in der Play Console](#9-pflichtangaben-in-der-play-console) (IARC, Datenschutz, Datensicherheit, …)
+10. [Release hochladen & testen](#10-release-hochladen--testen)
+11. [Veröffentlichung](#11-veröffentlichung)
+12. [Updates veröffentlichen](#12-updates-veröffentlichen)
+13. [Docker-Build](#docker-build-alles-im-container) (alles im Container)
+14. [Kosten](#kosten)
+15. [Häufige Probleme](#-häufige-probleme)
+16. [Checkliste vor dem Release](#-checkliste-vor-dem-release)
 
 ---
 
@@ -178,6 +192,27 @@ Die AAB-Datei liegt dann unter:
 android/app/build/outputs/bundle/release/app-release.aab
 ```
 
+### Auf einem Gerät testen
+
+Bevor du die AAB im Play Store hochlädst, solltest du die App auf einem echten Android-Gerät testen. Dafür brauchst du eine **APK** (nicht die AAB):
+
+**Variante 1 — Debug-APK über Android Studio:**
+1. In Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)**
+2. Die APK liegt unter `android/app/build/outputs/apk/debug/app-debug.apk`
+3. Übertrage sie auf dein Gerät (USB, Cloud, E-Mail) und installiere sie
+
+**Variante 2 — Interner Test im Play Store:**
+1. Lade die AAB als internen Test hoch (siehe [Release hochladen & testen](#11-release-hochladen--testen))
+2. Installiere die App über den Opt-in-Link auf deinem Gerät
+
+Prüfe nach der Installation:
+- [ ] App startet ohne Fehler
+- [ ] Gehaltseingabe funktioniert
+- [ ] Artikelliste wird korrekt angezeigt mit Prozentbalken
+- [ ] Kategorien-Filter funktioniert
+- [ ] Eigene Artikel hinzufügen/bearbeiten funktioniert
+- [ ] App-Icon und Splash Screen sehen korrekt aus
+
 ---
 
 ## 6. Google Play Developer Account
@@ -253,7 +288,11 @@ Du brauchst:
 
 ---
 
-## 9. Inhaltsbewertung (IARC)
+## 9. Pflichtangaben in der Play Console
+
+Die Play Console verlangt mehrere Angaben unter **Richtlinien → App-Inhalte**, bevor du veröffentlichen kannst. Ohne diese Angaben bleibt der "Veröffentlichen"-Button gesperrt.
+
+### 9.1 Inhaltsbewertung (IARC)
 
 1. Gehe zu **Richtlinien → App-Inhalte → Inhaltsbewertung**
 2. Starte den IARC-Fragebogen
@@ -265,11 +304,9 @@ Du brauchst:
    - Keinen User-Generated Content ✓
 4. Ergebnis: Voraussichtlich **PEGI 3 / USK 0** (für alle Altersgruppen)
 
----
+### 9.2 Datenschutzerklärung
 
-## 10. Datenschutzerklärung
-
-Da die App **keine Daten erhebt**, ist die Datenschutzerklärung einfach. Du brauchst trotzdem eine URL dafür.
+Da die App **keine Daten erhebt**, ist die Datenschutzerklärung einfach. Du brauchst trotzdem eine **öffentlich erreichbare URL** dafür.
 
 Erstelle eine einfache Seite (z.B. auf GitHub Pages) mit folgendem Text:
 
@@ -290,9 +327,40 @@ Kontakt: [deine E-Mail-Adresse]
 
 Verlinke diese URL in der Play Console unter **Richtlinien → App-Inhalte → Datenschutzerklärung**.
 
+### 9.3 Datensicherheit (Data Safety)
+
+Unter **Richtlinien → App-Inhalte → Datensicherheit** verlangt Google eine Erklärung, welche Daten die App erhebt. Für Salary Perspective:
+
+| Frage | Antwort |
+|---|---|
+| Erhebt oder teilt die App Nutzerdaten? | **Nein** |
+| Verschlüsselt die App Daten bei der Übertragung? | Nicht zutreffend (keine Netzwerk-Kommunikation) |
+| Können Nutzer die Löschung ihrer Daten beantragen? | Nicht zutreffend (keine Daten auf Servern) |
+
+> Da die App rein lokal arbeitet und keine Daten an Server sendet, ist dieser Abschnitt schnell erledigt.
+
+### 9.4 Werbeerklärung
+
+Unter **Richtlinien → App-Inhalte → Werbung**: Angeben, dass die App **keine Werbung enthält**.
+
+### 9.5 Zielgruppe & Inhalte
+
+Unter **Richtlinien → App-Inhalte → Zielgruppe und Inhalte**:
+
+- **Zielgruppe:** Wähle die passenden Altersgruppen (z.B. 18+, da es um Gehälter geht — oder "alle Altersgruppen" wenn bevorzugt)
+- Die App richtet sich **nicht primär an Kinder** — das vereinfacht die Anforderungen erheblich
+
+### 9.6 Weitere Erklärungen
+
+Je nach aktuellem Stand der Play Console können weitere Angaben erforderlich sein:
+
+- **Regierungs-Apps:** Nein
+- **Finanz-Features:** Nein (die App bietet keine Finanzdienstleistungen, nur eine Visualisierung)
+- **Gesundheits-Apps:** Nein
+
 ---
 
-## 11. Release hochladen & testen
+## 10. Release hochladen & testen
 
 ### Empfohlene Reihenfolge:
 
@@ -316,14 +384,16 @@ Verlinke diese URL in der Play Console unter **Richtlinien → App-Inhalte → D
 
 ---
 
-## 12. Veröffentlichung
+## 11. Veröffentlichung
 
 1. Stelle sicher, dass alle Pflichtfelder ausgefüllt sind:
    - [ ] Store Listing (Titel, Beschreibung, Screenshots, Icon)
    - [ ] Inhaltsbewertung
    - [ ] Datenschutzerklärung
-   - [ ] Preisgestaltung (Kostenlos)
+   - [ ] Datensicherheit
+   - [ ] Werbeerklärung
    - [ ] Zielgruppe & Inhalte
+   - [ ] Preisgestaltung (Kostenlos)
 2. Gehe zu **Produktion → Neuen Release erstellen**
 3. Lade die AAB-Datei hoch
 4. Füge Release-Notizen hinzu:
@@ -343,9 +413,23 @@ Verlinke diese URL in der Play Console unter **Richtlinien → App-Inhalte → D
 
 ---
 
-## 13. Updates veröffentlichen
+## 12. Updates veröffentlichen
 
-Für jedes Update:
+Jedes App-Update erfordert einen neuen AAB-Upload im Play Store (anders als bei einer gehosteten Web-App).
+
+### Mit Docker (empfohlen)
+
+Einfach Version erhöhen und neu bauen — der Docker-Container erledigt alles:
+
+```powershell
+docker compose run --rm -e VERSION_CODE=2 -e VERSION_NAME="1.1.0" build
+# oder ohne Compose:
+docker run --rm -v "${PWD}:/src:ro" -v "${PWD}/keystore:/keystore:ro" -v "${PWD}/output:/output" -e VERSION_CODE=2 -e VERSION_NAME="1.1.0" salary-perspective-builder
+```
+
+Dann `output/app-release.aab` in der Play Console hochladen.
+
+### Ohne Docker (lokale Installation)
 
 1. Erhöhe die `versionCode` und `versionName` in `android/app/build.gradle`:
    ```gradle
@@ -366,7 +450,16 @@ Für jedes Update:
 
 3. Lade die neue AAB in der Play Console hoch (Produktion → Neuer Release)
 
-4. Füge Release-Notizen hinzu und starte den Rollout
+### Was muss wann aktualisiert werden?
+
+| Änderung | Neuer AAB-Upload nötig? | Neuer Play Store Release? |
+|---|---|---|
+| Code-Änderungen (Features, Bugfixes) | Ja | Ja |
+| App-Icon oder Splash Screen | Ja | Ja |
+| Store-Beschreibung, Screenshots | Nein | Nein (direkt in Play Console ändern) |
+| Datenschutzerklärung | Nein | Nein (URL bleibt gleich, Inhalt aktualisieren) |
+
+Füge bei jedem Release **Release-Notizen** hinzu (z.B. "Neue Kategorien hinzugefügt, Performance verbessert"). Google zeigt diese den Nutzern im Play Store.
 
 ---
 
@@ -546,20 +639,63 @@ salary-perspective/
 
 ---
 
+## Kosten
+
+### Einmalige Kosten
+
+| Posten | Kosten | Hinweis |
+|---|---|---|
+| Google Play Developer-Registrierung | **25 USD** | Einmalig, gilt lebenslang |
+
+### Optionale / laufende Kosten
+
+| Posten | Kosten | Hinweis |
+|---|---|---|
+| Datenschutzerklärung hosten | **Kostenlos** | Z.B. über GitHub Pages |
+| Screenshots / Grafiken | **Kostenlos** | Eigene Screenshots, Canva oder Figma |
+| Domain (falls gewünscht) | **~10-15 EUR/Jahr** | Nur nötig, wenn du die Datenschutz-URL auf einer eigenen Domain hosten willst |
+
+### Gesamtkosten Minimum
+
+**25 USD einmalig** — es gibt keine laufenden Kosten, da die App offline funktioniert und kein Server-Hosting benötigt.
+
+---
+
 ## ❓ Häufige Probleme
 
-### "App wurde abgelehnt"
-- Prüfe die E-Mail von Google genau — dort steht der Grund
-- Häufig: fehlende Datenschutzerklärung, falsches Altersrating, oder irreführende Screenshots
+### App wurde von Google abgelehnt
+- Lies die Ablehnungs-E-Mail genau — dort steht der **konkrete Richtlinienverstoß**
+- Häufigste Gründe:
+  - Fehlende oder unzureichende Datenschutzerklärung
+  - Datensicherheits-Formular nicht oder falsch ausgefüllt
+  - Inhaltsbewertung fehlt
+  - Screenshots stimmen nicht mit der App überein
+  - App stürzt ab oder zeigt eine leere Seite
+- Behebe das Problem und reiche erneut ein. Du bekommst eine neue E-Mail mit dem Ergebnis.
 
-### "Keystore verloren"
-- Ohne Keystore kannst du **keine Updates** veröffentlichen
-- Du müsstest eine neue App mit neuer `appId` anlegen
-- **Backup-Tipp:** Speichere den Keystore + Passwort an einem sicheren Ort (z.B. Passwort-Manager)
+### Keystore verloren
+- Ohne Keystore kannst du **keine Updates** für die bestehende App veröffentlichen
+- Du müsstest eine komplett neue App mit neuer `appId` anlegen
+- **Backup-Tipp:** Speichere den Keystore + Passwort an einem sicheren Ort (z.B. Passwort-Manager, verschlüsselter USB-Stick)
+- Bei Docker-Builds: Der Keystore wird beim ersten Build nach `output/` kopiert — verschiebe ihn sofort nach `keystore/`
 
-### "AAB zu groß"
+### AAB zu groß
 - Normalerweise kein Problem bei dieser App (< 5 MB)
 - Falls doch: `npm run build` erzeugt bereits optimierten Code
+
+### Docker-Build schlägt fehl
+- **Image neu bauen** (ohne Cache): `docker build --no-cache -t salary-perspective-builder .`
+- **Netzwerkprobleme:** Der erste Build lädt ~1 GB herunter (Android SDK). Stelle sicher, dass die Internetverbindung stabil ist.
+- **Speicherplatz:** Das Docker-Image benötigt ca. 3-4 GB. Prüfe mit `docker system df`, ob genug Platz vorhanden ist.
+- **Windows-spezifisch:** Stelle sicher, dass Docker Desktop (oder WSL2) läuft und der Docker-Daemon erreichbar ist (`docker info`)
+
+### Veröffentlichen-Button in der Play Console bleibt gesperrt
+- Es fehlen noch Pflichtangaben. Prüfe unter **Richtlinien → App-Inhalte**, ob alle Punkte einen grünen Haken haben:
+  - Inhaltsbewertung
+  - Datenschutzerklärung
+  - Datensicherheit
+  - Werbeerklärung
+  - Zielgruppe & Inhalte
 
 ---
 
@@ -568,9 +704,13 @@ salary-perspective/
 - [ ] App läuft fehlerfrei (`npm run dev` + `npm run build`)
 - [ ] Keystore erstellt und sicher gespeichert
 - [ ] AAB-Datei generiert
+- [ ] Auf echtem Android-Gerät getestet
 - [ ] Play Developer Account registriert und verifiziert
 - [ ] Store Listing komplett (Titel, Beschreibung, Screenshots, Icon, Feature-Graphic)
-- [ ] Inhaltsbewertung ausgefüllt
-- [ ] Datenschutzerklärung verlinkt
+- [ ] Inhaltsbewertung (IARC) ausgefüllt
+- [ ] Datenschutzerklärung gehostet und verlinkt
+- [ ] Datensicherheits-Formular ausgefüllt
+- [ ] Werbeerklärung ausgefüllt
+- [ ] Zielgruppe & Inhalte angegeben
 - [ ] Interner Test bestanden
 - [ ] Release-Notizen geschrieben
