@@ -24,7 +24,19 @@ Schritt-für-Schritt-Anleitung zur Veröffentlichung der App im Google Play Stor
 
 ## 1. Voraussetzungen
 
-Bevor du starten kannst, brauchst du:
+### Option A: Docker-Build (empfohlen — nichts auf Windows installieren)
+
+Du brauchst nur:
+
+- [ ] **Docker** — eine der folgenden Varianten:
+  - **Docker Desktop** ([Download](https://www.docker.com/products/docker-desktop/)) — inkl. GUI und `docker compose`
+  - **Docker CLI via WSL2** — leichtgewichtig, nur Kommandozeile (siehe [Anleitung](https://docs.docker.com/engine/install/ubuntu/) in deiner WSL-Distro)
+- [ ] **Google Play Developer Account** ([Registrieren](https://play.google.com/console) — einmalig 25 USD)
+
+> Mit Docker brauchst du **kein** Node.js, Android Studio oder JDK auf deinem Rechner.
+> Alles läuft im Container. Siehe [Docker-Build](#docker-build-alles-im-container) weiter unten.
+
+### Option B: Lokale Installation (klassisch)
 
 - [ ] **Node.js** (v18+) und **npm** installiert
 - [ ] **Android Studio** installiert ([Download](https://developer.android.com/studio))
@@ -355,6 +367,182 @@ Für jedes Update:
 3. Lade die neue AAB in der Play Console hoch (Produktion → Neuer Release)
 
 4. Füge Release-Notizen hinzu und starte den Rollout
+
+---
+
+## Docker-Build (alles im Container)
+
+Wenn du **nichts lokal installieren** willst (kein Node.js, kein JDK, kein Android Studio), kannst du die AAB-Datei komplett per Docker bauen. Du brauchst nur **Docker** (Desktop oder CLI).
+
+### Erster Build
+
+Wähle die Variante, die zu deinem Setup passt:
+
+<details>
+<summary><strong>Mit Docker Compose</strong> (Docker Desktop oder <code>docker compose</code> Plugin)</summary>
+
+```powershell
+# 1. Keystore-Ordner & Output-Ordner erstellen
+mkdir keystore, output
+
+# 2. Docker-Image bauen & AAB erstellen (erster Durchlauf dauert ~5-10 Min.)
+docker compose run --rm build
+```
+
+</details>
+
+<details>
+<summary><strong>Nur Docker CLI</strong> (ohne Compose)</summary>
+
+```powershell
+# 1. Keystore-Ordner & Output-Ordner erstellen
+mkdir keystore, output
+
+# 2. Docker-Image bauen
+docker build -t salary-perspective-builder .
+
+# 3. AAB erstellen (erster Durchlauf dauert ~5-10 Min.)
+docker run --rm `
+  -v "${PWD}:/src:ro" `
+  -v "${PWD}/keystore:/keystore:ro" `
+  -v "${PWD}/output:/output" `
+  salary-perspective-builder
+```
+
+</details>
+
+Beim ersten Build wird automatisch:
+- Ein **Release-Keystore** generiert und nach `output/salary-perspective-release.keystore` kopiert
+- Die Web-App gebaut (npm)
+- Capacitor + Android-Plattform eingerichtet
+- Die signierte **AAB-Datei** nach `output/app-release.aab` kopiert
+
+> **Wichtig:** Sichere den generierten Keystore sofort!
+> ```powershell
+> # Keystore für zukünftige Builds in den keystore-Ordner verschieben
+> Move-Item output/salary-perspective-release.keystore keystore/
+> ```
+
+### Folge-Builds / Updates
+
+<details>
+<summary><strong>Mit Docker Compose</strong></summary>
+
+```powershell
+docker compose run --rm -e VERSION_CODE=2 -e VERSION_NAME="1.1.0" build
+```
+
+</details>
+
+<details>
+<summary><strong>Nur Docker CLI</strong></summary>
+
+```powershell
+docker run --rm `
+  -v "${PWD}:/src:ro" `
+  -v "${PWD}/keystore:/keystore:ro" `
+  -v "${PWD}/output:/output" `
+  -e VERSION_CODE=2 `
+  -e VERSION_NAME="1.1.0" `
+  salary-perspective-builder
+```
+
+</details>
+
+Die neue AAB-Datei liegt dann unter `output/app-release.aab`.
+
+### Eigenes Keystore-Passwort setzen
+
+<details>
+<summary><strong>Mit Docker Compose</strong></summary>
+
+```powershell
+# Beim ersten Build ein sicheres Passwort setzen
+docker compose run --rm -e KEYSTORE_PASSWORD="DeinSicheresPasswort123" build
+
+# Bei Folge-Builds dasselbe Passwort verwenden!
+docker compose run --rm -e KEYSTORE_PASSWORD="DeinSicheresPasswort123" -e VERSION_CODE=2 build
+```
+
+</details>
+
+<details>
+<summary><strong>Nur Docker CLI</strong></summary>
+
+```powershell
+# Beim ersten Build ein sicheres Passwort setzen
+docker run --rm `
+  -v "${PWD}:/src:ro" `
+  -v "${PWD}/keystore:/keystore:ro" `
+  -v "${PWD}/output:/output" `
+  -e KEYSTORE_PASSWORD="DeinSicheresPasswort123" `
+  salary-perspective-builder
+
+# Bei Folge-Builds dasselbe Passwort verwenden!
+docker run --rm `
+  -v "${PWD}:/src:ro" `
+  -v "${PWD}/keystore:/keystore:ro" `
+  -v "${PWD}/output:/output" `
+  -e KEYSTORE_PASSWORD="DeinSicheresPasswort123" `
+  -e VERSION_CODE=2 `
+  salary-perspective-builder
+```
+
+</details>
+
+### Alle Konfigurationsoptionen
+
+| Variable           | Standard                     | Beschreibung                           |
+|--------------------|------------------------------|----------------------------------------|
+| `KEYSTORE_PASSWORD`| `android`                    | Passwort für den Release-Keystore      |
+| `KEYSTORE_ALIAS`   | `salary-perspective`         | Alias im Keystore                      |
+| `VERSION_CODE`     | `1`                          | Muss bei jedem Update steigen (Integer)|
+| `VERSION_NAME`     | `1.0.0`                      | Für Nutzer sichtbare Versionsnummer    |
+| `APP_ID`           | `com.salaryperspective.app`  | Android App-ID (nicht ändern!)         |
+
+### Docker Volumes zurücksetzen (Clean Build)
+
+Falls du einen komplett frischen Build brauchst:
+
+<details>
+<summary><strong>Mit Docker Compose</strong></summary>
+
+```powershell
+docker compose down -v
+docker compose run --rm build
+```
+
+</details>
+
+<details>
+<summary><strong>Nur Docker CLI</strong></summary>
+
+```powershell
+# Image neu bauen (--no-cache für komplett frisch)
+docker build --no-cache -t salary-perspective-builder .
+
+# Erneut ausführen
+docker run --rm `
+  -v "${PWD}:/src:ro" `
+  -v "${PWD}/keystore:/keystore:ro" `
+  -v "${PWD}/output:/output" `
+  salary-perspective-builder
+```
+
+</details>
+
+### Verzeichnisstruktur nach dem Build
+
+```
+salary-perspective/
+├── keystore/
+│   └── salary-perspective-release.keystore   ← SICHER AUFBEWAHREN!
+├── output/
+│   └── app-release.aab                       ← Hochladen in Play Console
+├── Dockerfile
+├── docker-compose.yml                        ← Optional (nur für Compose)
+└── ...
+```
 
 ---
 
