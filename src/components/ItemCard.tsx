@@ -4,7 +4,7 @@ import { useStore, calcPercent, calcWorkHours } from '@/store/useStore'
 import { formatEUR, formatPercent, formatWorkTime } from '@/lib/utils'
 import { PercentBar } from './PercentBar'
 import { categoryIconsMedium } from './categoryIcons'
-import { Clock } from 'lucide-react'
+import { Clock, Star } from 'lucide-react'
 
 interface ItemCardProps {
   item: Item
@@ -15,11 +15,13 @@ export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
   const salary = useStore((s) => s.salary)
   const salaryMode = useStore((s) => s.salaryMode)
   const hoursPerWeek = useStore((s) => s.hoursPerWeek)
+  const favoriteIds = useStore((s) => s.favoriteIds)
   const percent = calcPercent(item.price, salary, salaryMode)
   const workHours = calcWorkHours(item.price, salary, salaryMode, hoursPerWeek)
+  const isFavorite = favoriteIds.includes(item.id)
 
   return (
-    <div className="item-card flex items-start gap-3 rounded-xl bg-card border border-border/50 p-3.5 shadow-sm">
+    <div className={`item-card flex items-start gap-3 rounded-xl bg-card border p-3.5 shadow-sm ${isFavorite ? 'border-amber-400/60 ring-1 ring-amber-400/30' : 'border-border/50'}`}>
       {/* Category icon */}
       <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
         {categoryIconsMedium[item.category]}
@@ -29,8 +31,9 @@ export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold leading-tight truncate">
+            <h3 className="text-sm font-semibold leading-tight truncate flex items-center gap-1">
               {item.name}
+              {isFavorite && <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" />}
             </h3>
             <p className="text-xs text-muted-foreground truncate">
               {item.description}
