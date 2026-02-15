@@ -23,9 +23,7 @@ export function HomePage() {
       {/* Category filter + sort */}
       <div className="sticky top-[calc(var(--header-h,220px))] z-20 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-lg px-4 py-3 space-y-2">
-          <div className="overflow-x-auto scrollbar-hide">
-            <CategoryFilter />
-          </div>
+          <CategoryFilter />
           <SortToggle />
         </div>
       </div>
