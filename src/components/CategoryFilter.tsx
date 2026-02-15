@@ -1,21 +1,7 @@
 import { useStore } from '@/store/useStore'
 import { CATEGORIES, Category } from '@/types'
 import { cn } from '@/lib/utils'
-import {
-  UtensilsCrossed,
-  Home,
-  Smartphone,
-  PartyPopper,
-  LayoutGrid,
-} from 'lucide-react'
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  alle: <LayoutGrid className="h-3.5 w-3.5" />,
-  essen: <UtensilsCrossed className="h-3.5 w-3.5" />,
-  wohnen: <Home className="h-3.5 w-3.5" />,
-  technik: <Smartphone className="h-3.5 w-3.5" />,
-  freizeit: <PartyPopper className="h-3.5 w-3.5" />,
-}
+import { categoryIconsSmall } from './categoryIcons'
 
 export function CategoryFilter() {
   const activeCategory = useStore((s) => s.activeCategory)
@@ -34,7 +20,7 @@ export function CategoryFilter() {
               : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
           )}
         >
-          {categoryIcons[cat.id]}
+          {categoryIconsSmall[cat.id]}
           {cat.label}
         </button>
       ))}

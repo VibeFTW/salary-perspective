@@ -58,6 +58,8 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'salary-perspective-storage',
+      // Version localStorage data for safe schema evolution (client-localstorage-schema)
+      version: 1,
     }
   )
 )

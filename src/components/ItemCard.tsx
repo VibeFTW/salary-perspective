@@ -1,34 +1,24 @@
+import { memo } from 'react'
 import { Item } from '@/types'
 import { useStore, calcPercent } from '@/store/useStore'
 import { formatEUR, formatPercent } from '@/lib/utils'
 import { PercentBar } from './PercentBar'
-import {
-  UtensilsCrossed,
-  Home,
-  Smartphone,
-  PartyPopper,
-} from 'lucide-react'
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  essen: <UtensilsCrossed className="h-5 w-5 text-orange-500" />,
-  wohnen: <Home className="h-5 w-5 text-blue-500" />,
-  technik: <Smartphone className="h-5 w-5 text-purple-500" />,
-  freizeit: <PartyPopper className="h-5 w-5 text-emerald-500" />,
-}
+import { categoryIconsMedium } from './categoryIcons'
 
 interface ItemCardProps {
   item: Item
 }
 
-export function ItemCard({ item }: ItemCardProps) {
+// Memoize to skip re-renders when item and salary haven't changed (rerender-memo)
+export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
   const salary = useStore((s) => s.salary)
   const percent = calcPercent(item.price, salary)
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-card border border-border/50 p-3.5 shadow-sm">
+    <div className="item-card flex items-start gap-3 rounded-xl bg-card border border-border/50 p-3.5 shadow-sm">
       {/* Category icon */}
       <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-        {categoryIcons[item.category]}
+        {categoryIconsMedium[item.category]}
       </div>
 
       {/* Content */}
@@ -59,4 +49,4 @@ export function ItemCard({ item }: ItemCardProps) {
       </div>
     </div>
   )
-}
+})

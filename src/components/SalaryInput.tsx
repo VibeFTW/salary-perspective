@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useStore } from '@/store/useStore'
 import { SalaryModeToggle } from './SalaryModeToggle'
 import { formatEUR, parseGermanNumber } from '@/lib/utils'
@@ -8,28 +8,36 @@ export function SalaryInput() {
   const setSalary = useStore((s) => s.setSalary)
   const salaryMode = useStore((s) => s.salaryMode)
 
-  const [inputValue, setInputValue] = useState(formatEUR(salary))
-  const [isFocused, setIsFocused] = useState(false)
+  // Lazy state init — formatEUR only runs on initial render (rerender-lazy-state-init)
+  const [inputValue, setInputValue] = useState(() => formatEUR(salary))
+
+  // Track focus state in a ref — avoids re-renders on focus change
+  // and keeps effect dependency list narrow (rerender-use-ref-transient-values)
+  const isFocusedRef = useRef(false)
 
   // Sync display when salary changes externally (e.g. from storage)
   useEffect(() => {
-    if (!isFocused) {
+    if (!isFocusedRef.current) {
       setInputValue(formatEUR(salary))
     }
-  }, [salary, isFocused])
-
-  const handleFocus = useCallback(() => {
-    setIsFocused(true)
-    // Show raw number for easier editing
-    setInputValue(salary === 0 ? '' : salary.toString().replace('.', ','))
   }, [salary])
 
+  const handleFocus = useCallback(() => {
+    isFocusedRef.current = true
+    // Show raw number for easier editing
+    const currentSalary = useStore.getState().salary
+    setInputValue(currentSalary === 0 ? '' : currentSalary.toString().replace('.', ','))
+  }, [])
+
   const handleBlur = useCallback(() => {
-    setIsFocused(false)
-    const parsed = parseGermanNumber(inputValue)
-    setSalary(parsed)
-    setInputValue(formatEUR(parsed))
-  }, [inputValue, setSalary])
+    isFocusedRef.current = false
+    // Use functional update to read latest inputValue (rerender-functional-setstate)
+    setInputValue((current) => {
+      const parsed = parseGermanNumber(current)
+      setSalary(parsed)
+      return formatEUR(parsed)
+    })
+  }, [setSalary])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

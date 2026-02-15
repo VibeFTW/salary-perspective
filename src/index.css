@@ -42,6 +42,12 @@
   flex-direction: column;
 }
 
+/* Skip layout/paint for off-screen item cards (rendering-content-visibility) */
+.item-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 88px;
+}
+
 /* Hide number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {

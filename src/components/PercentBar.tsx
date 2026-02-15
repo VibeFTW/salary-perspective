@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { cn } from '@/lib/utils'
 
 interface PercentBarProps {
@@ -11,7 +12,8 @@ function getBarColor(percent: number): string {
   return 'bg-red-500'
 }
 
-export function PercentBar({ percent }: PercentBarProps) {
+// Memoize — only re-renders when percent value changes (rerender-memo)
+export const PercentBar = memo(function PercentBar({ percent }: PercentBarProps) {
   // Cap the visual width at 100%
   const width = Math.min(percent, 100)
 
@@ -23,4 +25,4 @@ export function PercentBar({ percent }: PercentBarProps) {
       />
     </div>
   )
-}
+})

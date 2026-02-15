@@ -4,23 +4,13 @@ import { Button } from '@/components/ui/button'
 import { ItemForm } from '@/components/ItemForm'
 import { Item, Category } from '@/types'
 import { formatEUR } from '@/lib/utils'
+import { categoryIconsManage } from '@/components/categoryIcons'
 import {
   Plus,
   Pencil,
   Trash2,
   RotateCcw,
-  UtensilsCrossed,
-  Home,
-  Smartphone,
-  PartyPopper,
 } from 'lucide-react'
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  essen: <UtensilsCrossed className="h-4 w-4 text-orange-500" />,
-  wohnen: <Home className="h-4 w-4 text-blue-500" />,
-  technik: <Smartphone className="h-4 w-4 text-purple-500" />,
-  freizeit: <PartyPopper className="h-4 w-4 text-emerald-500" />,
-}
 
 export function ManagePage() {
   const items = useStore((s) => s.items)
@@ -31,14 +21,18 @@ export function ManagePage() {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  // Key forces ItemForm to re-mount with fresh state (rerender-derived-state-no-effect)
+  const [formKey, setFormKey] = useState(0)
 
   const handleAdd = () => {
     setEditingItem(null)
+    setFormKey((k) => k + 1)
     setFormOpen(true)
   }
 
   const handleEdit = (item: Item) => {
     setEditingItem(item)
+    setFormKey((k) => k + 1)
     setFormOpen(true)
   }
 
@@ -59,7 +53,8 @@ export function ManagePage() {
     deleteItem(id)
   }
 
-  const sorted = [...items].sort((a, b) => a.sortOrder - b.sortOrder)
+  // Use toSorted() for immutability — avoids mutating original array (js-tosorted-immutable)
+  const sorted = items.toSorted((a, b) => a.sortOrder - b.sortOrder)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -93,7 +88,7 @@ export function ManagePage() {
               className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-3 shadow-sm"
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                {categoryIcons[item.category]}
+                {categoryIconsManage[item.category]}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate">{item.name}</p>
@@ -124,8 +119,9 @@ export function ManagePage() {
         </div>
       </main>
 
-      {/* Form dialog */}
+      {/* Form dialog — key forces re-mount to reset form state */}
       <ItemForm
+        key={formKey}
         open={formOpen}
         onOpenChange={setFormOpen}
         item={editingItem}

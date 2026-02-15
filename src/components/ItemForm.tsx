@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -27,25 +27,15 @@ interface ItemFormProps {
   onSave: (data: { name: string; description: string; price: number; category: Category }) => void
 }
 
+// State is initialized from props on mount. Parent uses a key to force
+// re-mount when editing a different item (rerender-derived-state-no-effect).
 export function ItemForm({ open, onOpenChange, item, onSave }: ItemFormProps) {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [priceStr, setPriceStr] = useState('')
-  const [category, setCategory] = useState<Category>('essen')
-
-  useEffect(() => {
-    if (item) {
-      setName(item.name)
-      setDescription(item.description)
-      setPriceStr(item.price.toString().replace('.', ','))
-      setCategory(item.category)
-    } else {
-      setName('')
-      setDescription('')
-      setPriceStr('')
-      setCategory('essen')
-    }
-  }, [item, open])
+  const [name, setName] = useState(item?.name ?? '')
+  const [description, setDescription] = useState(item?.description ?? '')
+  const [priceStr, setPriceStr] = useState(
+    item ? item.price.toString().replace('.', ',') : ''
+  )
+  const [category, setCategory] = useState<Category>(item?.category ?? 'essen')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

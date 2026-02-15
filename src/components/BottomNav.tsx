@@ -2,9 +2,14 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { BarChart3, Settings } from 'lucide-react'
 
+// Preload ManagePage chunk on hover/focus for perceived speed (bundle-preload)
+const preloadManagePage = () => {
+  void import('@/pages/ManagePage')
+}
+
 const navItems = [
-  { to: '/', label: 'Startseite', icon: BarChart3 },
-  { to: '/verwalten', label: 'Verwalten', icon: Settings },
+  { to: '/', label: 'Startseite', icon: BarChart3, onPreload: undefined as (() => void) | undefined },
+  { to: '/verwalten', label: 'Verwalten', icon: Settings, onPreload: preloadManagePage },
 ]
 
 export function BottomNav() {
@@ -15,6 +20,8 @@ export function BottomNav() {
           <NavLink
             key={item.to}
             to={item.to}
+            onMouseEnter={item.onPreload}
+            onFocus={item.onPreload}
             className={({ isActive }) =>
               cn(
                 'flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors',

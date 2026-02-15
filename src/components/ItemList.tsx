@@ -11,7 +11,8 @@ export function ItemList() {
       ? items
       : items.filter((item) => item.category === activeCategory)
 
-  const sorted = [...filtered].sort((a, b) => a.sortOrder - b.sortOrder)
+  // Use toSorted() for immutability — avoids mutating original array (js-tosorted-immutable)
+  const sorted = filtered.toSorted((a, b) => a.sortOrder - b.sortOrder)
 
   if (salary <= 0) {
     return (
