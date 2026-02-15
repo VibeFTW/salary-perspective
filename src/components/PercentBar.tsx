@@ -6,8 +6,8 @@ interface PercentBarProps {
 }
 
 function getBarColor(percent: number): string {
-  if (percent < 1) return 'bg-emerald-500'
-  if (percent < 10) return 'bg-yellow-500'
+  if (percent < 5) return 'bg-emerald-500'
+  if (percent < 20) return 'bg-yellow-500'
   if (percent < 50) return 'bg-orange-500'
   return 'bg-red-500'
 }
