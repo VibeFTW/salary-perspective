@@ -155,7 +155,7 @@ export function ManagePage() {
       <div className="mx-auto w-full max-w-lg px-4 py-3">
         <Button onClick={handleAdd} className="w-full" size="lg">
           <Plus className="h-4 w-4 mr-2" />
-          Neue Sache hinzufügen
+          Was darf's noch kosten?
         </Button>
       </div>
 
