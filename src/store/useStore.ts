@@ -10,6 +10,8 @@ interface AppState {
   items: Item[]
   activeCategory: Category | 'alle'
   sortMode: SortMode
+  favoriteIds: string[]
+  showFavorites: boolean
 
   setSalary: (salary: number) => void
   setSalaryMode: (mode: SalaryMode) => void
@@ -20,6 +22,8 @@ interface AppState {
   updateItem: (id: string, updates: Partial<Omit<Item, 'id'>>) => void
   deleteItem: (id: string) => void
   resetItems: () => void
+  toggleFavorite: (id: string) => void
+  setShowFavorites: (show: boolean) => void
 }
 
 export const useStore = create<AppState>()(
@@ -31,6 +35,8 @@ export const useStore = create<AppState>()(
       items: defaultItems,
       activeCategory: 'alle',
       sortMode: 'default',
+      favoriteIds: [],
+      showFavorites: false,
 
       setSalary: (salary) => set({ salary }),
       setSalaryMode: (salaryMode) => set({ salaryMode }),
@@ -63,11 +69,20 @@ export const useStore = create<AppState>()(
         })),
 
       resetItems: () => set({ items: defaultItems }),
+
+      toggleFavorite: (id) =>
+        set((state) => ({
+          favoriteIds: state.favoriteIds.includes(id)
+            ? state.favoriteIds.filter((fid) => fid !== id)
+            : [...state.favoriteIds, id],
+        })),
+
+      setShowFavorites: (showFavorites) => set({ showFavorites }),
     }),
     {
       name: 'salary-perspective-storage',
       // Version localStorage data for safe schema evolution (client-localstorage-schema)
-      version: 5,
+      version: 6,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 2) {
@@ -79,6 +94,10 @@ export const useStore = create<AppState>()(
         if (version < 5) {
           // Re-apply default items with new featured sort order + high-value items
           state.items = defaultItems
+        }
+        if (version < 6) {
+          state.favoriteIds = []
+          state.showFavorites = false
         }
         return state as AppState
       },

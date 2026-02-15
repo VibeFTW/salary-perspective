@@ -2,6 +2,7 @@ import { useStore } from '@/store/useStore'
 import { CATEGORIES, Category } from '@/types'
 import { cn } from '@/lib/utils'
 import { categoryIconsSmall } from './categoryIcons'
+import { Star } from 'lucide-react'
 
 /** Active-state colors matching each category's icon color */
 const categoryActiveColors: Record<string, string> = {
@@ -15,6 +16,12 @@ const categoryActiveColors: Record<string, string> = {
 export function CategoryFilter() {
   const activeCategory = useStore((s) => s.activeCategory)
   const setActiveCategory = useStore((s) => s.setActiveCategory)
+  const showFavorites = useStore((s) => s.showFavorites)
+  const setShowFavorites = useStore((s) => s.setShowFavorites)
+
+  const handleFavoritesClick = () => {
+    setShowFavorites(!showFavorites)
+  }
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -33,6 +40,20 @@ export function CategoryFilter() {
           {cat.label}
         </button>
       ))}
+
+      {/* Favorites filter */}
+      <button
+        onClick={handleFavoritesClick}
+        className={cn(
+          'flex items-center justify-center shrink-0 rounded-full p-2 transition-all',
+          showFavorites
+            ? 'bg-amber-500 text-white shadow-sm'
+            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+        )}
+        title="Favoriten"
+      >
+        <Star className={cn('h-4 w-4', showFavorites && 'fill-current')} />
+      </button>
     </div>
   )
 }

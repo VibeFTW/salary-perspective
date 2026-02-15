@@ -11,6 +11,7 @@ import {
   Trash2,
   RotateCcw,
   Clock,
+  Star,
 } from 'lucide-react'
 
 export function ManagePage() {
@@ -21,6 +22,8 @@ export function ManagePage() {
   const resetItems = useStore((s) => s.resetItems)
   const hoursPerWeek = useStore((s) => s.hoursPerWeek)
   const setHoursPerWeek = useStore((s) => s.setHoursPerWeek)
+  const favoriteIds = useStore((s) => s.favoriteIds)
+  const toggleFavorite = useStore((s) => s.toggleFavorite)
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
@@ -174,6 +177,15 @@ export function ManagePage() {
                 </p>
               </div>
               <div className="flex shrink-0 gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 ${favoriteIds.includes(item.id) ? 'text-amber-500 hover:text-amber-600' : ''}`}
+                  onClick={() => toggleFavorite(item.id)}
+                  title={favoriteIds.includes(item.id) ? 'Favorit entfernen' : 'Als Favorit markieren'}
+                >
+                  <Star className={`h-3.5 w-3.5 ${favoriteIds.includes(item.id) ? 'fill-current' : ''}`} />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

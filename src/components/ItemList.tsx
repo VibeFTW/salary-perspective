@@ -1,7 +1,7 @@
 import { useStore, toMonthlySalary } from '@/store/useStore'
 import { formatEUR } from '@/lib/utils'
 import { ItemCard } from './ItemCard'
-import { Info } from 'lucide-react'
+import { Info, Star } from 'lucide-react'
 
 export function ItemList() {
   const items = useStore((s) => s.items)
@@ -9,12 +9,19 @@ export function ItemList() {
   const salary = useStore((s) => s.salary)
   const salaryMode = useStore((s) => s.salaryMode)
   const sortMode = useStore((s) => s.sortMode)
+  const showFavorites = useStore((s) => s.showFavorites)
+  const favoriteIds = useStore((s) => s.favoriteIds)
   const monthlySalary = toMonthlySalary(salary, salaryMode)
 
-  const filtered =
+  let filtered =
     activeCategory === 'alle'
       ? items
       : items.filter((item) => item.category === activeCategory)
+
+  // Apply favorites filter
+  if (showFavorites) {
+    filtered = filtered.filter((item) => favoriteIds.includes(item.id))
+  }
 
   // Use toSorted() for immutability — avoids mutating original array (js-tosorted-immutable)
   // Sorting by price is equivalent to sorting by percentage/work-time (same salary divisor)
@@ -32,6 +39,20 @@ export function ItemList() {
         </p>
         <p className="text-sm text-muted-foreground/70 mt-1">
           um die Prozente zu sehen
+        </p>
+      </div>
+    )
+  }
+
+  if (showFavorites && sorted.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Star className="h-10 w-10 text-muted-foreground/40 mb-3" />
+        <p className="text-lg font-medium text-muted-foreground">
+          Noch keine Favoriten
+        </p>
+        <p className="text-sm text-muted-foreground/70 mt-1">
+          Markiere Sachen als Favorit unter „Verwalten"
         </p>
       </div>
     )
