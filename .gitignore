@@ -6,10 +6,11 @@ dist
 android
 ios
 
-# Keystore — NEVER commit these
+# Keystore & signing secrets — NEVER commit these
 *.keystore
 *.jks
 keystore/
+android/key.properties
 
 # Docker build output
 output/
