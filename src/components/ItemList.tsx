@@ -57,10 +57,10 @@ export function ItemList() {
           <span className="font-semibold text-foreground">
             {formatEUR(monthlySalary)} €
           </span>{' '}
-          / Monat
+          pro Monat
           {salaryMode === 'yearly' && (
             <span className="ml-1">
-              ({formatEUR(salary)} € / Jahr ÷ 12)
+              ({formatEUR(salary)} € pro Jahr ÷ 12)
             </span>
           )}
         </span>

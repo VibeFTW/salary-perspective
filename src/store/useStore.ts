@@ -25,7 +25,7 @@ interface AppState {
 export const useStore = create<AppState>()(
   persist(
     (set) => ({
-      salary: 2400,
+      salary: 2500,
       salaryMode: 'monthly',
       hoursPerWeek: 40,
       items: defaultItems,

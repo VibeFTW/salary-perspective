@@ -41,23 +41,26 @@ export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
           </span>
         </div>
 
-        {/* Percent bar + value */}
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex-1">
-            <PercentBar percent={percent} />
-          </div>
-          <span className="shrink-0 text-xs font-bold tabular-nums min-w-[60px] text-right">
-            {formatPercent(percent)}
-          </span>
+        {/* Percent bar */}
+        <div className="mt-2">
+          <PercentBar percent={percent} />
         </div>
 
-        {/* Work time */}
-        {hoursPerWeek > 0 && (
-          <div className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span>{formatWorkTime(workHours)}</span>
-          </div>
-        )}
+        {/* Percentage + work time on one line */}
+        <div className="mt-1.5 flex items-center gap-1.5 text-xs">
+          <span className="font-bold tabular-nums">
+            {formatPercent(percent)}
+          </span>
+          {hoursPerWeek > 0 && (
+            <>
+              <span className="text-muted-foreground">·</span>
+              <span className="flex items-center gap-1 font-bold tabular-nums">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                {formatWorkTime(workHours)}
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
