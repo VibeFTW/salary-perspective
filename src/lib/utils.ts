@@ -18,10 +18,20 @@ export function formatEUR(value: number): string {
 
 /**
  * Format percentage for display in German locale.
- * < 10%: one decimal place  (e.g. "4,2%", "0,3%")
- * >= 10%: no decimals       (e.g. "42%", "100%")
+ * < 0.1%:  "< 0,1%"
+ * < 10%:   one decimal       (e.g. "4,2%")
+ * 10–100%: no decimals       (e.g. "42%")
+ * > 100%:  multiplier format (e.g. "1,1x Monatsgehalt")
  */
 export function formatPercent(value: number): string {
+  if (value > 100) {
+    const multiplier = value / 100
+    const decimals = multiplier >= 10 ? 0 : 1
+    return multiplier.toLocaleString('de-DE', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }) + 'x Monatsgehalt'
+  }
   if (value < 0.1 && value > 0) {
     return '< 0,1%'
   }
