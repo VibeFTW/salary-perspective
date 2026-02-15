@@ -9,7 +9,8 @@ function getBarColor(percent: number): string {
   if (percent < 5) return 'bg-emerald-500'
   if (percent < 20) return 'bg-yellow-500'
   if (percent < 50) return 'bg-orange-500'
-  return 'bg-red-500'
+  if (percent <= 100) return 'bg-red-400'
+  return 'bg-red-600'
 }
 
 // Memoize — only re-renders when percent value changes (rerender-memo)
