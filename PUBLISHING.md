@@ -62,17 +62,54 @@ Du brauchst nur:
 
 ## 2. Capacitor einrichten
 
-Falls noch nicht geschehen:
+> **Hinweis:** Wenn du den **Docker-Build** nutzt ([siehe unten](#docker-build-alles-im-container)), kannst du diesen Abschnitt überspringen — der Container erledigt alle Schritte automatisch.
+
+### 2.1 Capacitor-Pakete installieren
+
+Zuerst müssen die Capacitor-Pakete als npm-Abhängigkeiten installiert werden. Ohne diesen Schritt ist der `cap`-Befehl nicht verfügbar und `npx cap` schlägt fehl.
 
 ```bash
-# Capacitor initialisieren
-npx cap init salary-perspective com.salaryperspective.app --web-dir dist
-
-# Android-Plattform hinzufügen
-npx cap add android
+npm install @capacitor/core @capacitor/cli @capacitor/android
 ```
 
-Die Datei `capacitor.config.ts` sollte so aussehen:
+Was passiert hier?
+- **`@capacitor/core`** — die Laufzeit-Bibliothek, die in der App mitläuft
+- **`@capacitor/cli`** — das Kommandozeilen-Tool (`cap`), mit dem du Capacitor steuerst
+- **`@capacitor/android`** — erzeugt das Android-Projekt (den `android/`-Ordner)
+
+Nach der Installation erscheinen diese drei Pakete in deiner `package.json` unter `dependencies`.
+
+### 2.2 Die App-ID verstehen
+
+Bevor du Capacitor initialisierst, musst du eine **App-ID** (auch "Application ID" oder "Package Name") wählen. Diese ID ist die weltweit eindeutige Kennung deiner App im Google Play Store.
+
+| Eigenschaft | Details |
+|---|---|
+| **Format** | Umgekehrte Domain-Notation, z.B. `com.salaryperspective.app` |
+| **Konvention** | `com.<firmenname>.<appname>` — wenn du keine Domain besitzt, denke dir eine aus |
+| **Einschränkungen** | Nur Kleinbuchstaben, Zahlen und Punkte. Mindestens zwei Segmente (z.B. `com.example`) |
+| **Änderbar?** | **Nein** — nach der ersten Veröffentlichung im Play Store kann die App-ID **nie** geändert werden |
+| **Wo taucht sie auf?** | In der `capacitor.config.ts`, im Android-Projekt, und im Google Play Store als eindeutige Kennung |
+
+In dieser Anleitung verwenden wir **`com.salaryperspective.app`**. Du kannst eine andere ID wählen (z.B. `com.deinname.salaryperspective`), musst dann aber in allen folgenden Schritten deine eigene ID verwenden.
+
+> **Play Console:** Wenn du die App später im Google Play Store anlegst ([Schritt 7](#7-app-in-der-play-console-anlegen)), wird die App-ID automatisch übernommen, sobald du die AAB-Datei hochlädst. Du musst sie dort **nicht manuell eingeben** — sie ist in der AAB eingebettet. Play Console und App-ID müssen übereinstimmen; du legst die ID also jetzt hier fest und der Play Store übernimmt sie.
+
+### 2.3 Capacitor initialisieren
+
+Jetzt wird Capacitor für dein Projekt eingerichtet. Dieser Befehl erstellt die Konfigurationsdatei `capacitor.config.ts` im Projektordner:
+
+```bash
+npx cap init "Salary Perspective" com.salaryperspective.app --web-dir dist
+```
+
+| Parameter | Bedeutung |
+|---|---|
+| `"Salary Perspective"` | Der **Anzeigename** der App (erscheint unter dem App-Icon auf dem Handy). Anführungszeichen nötig wegen dem Leerzeichen. |
+| `com.salaryperspective.app` | Die **App-ID** (siehe oben). |
+| `--web-dir dist` | Sagt Capacitor, dass die fertige Web-App im `dist/`-Ordner liegt (dort, wohin `npm run build` die Dateien schreibt). |
+
+Nach dem Befehl erscheint eine neue Datei **`capacitor.config.ts`** im Projektstamm. Sie sollte so aussehen:
 
 ```typescript
 import type { CapacitorConfig } from '@capacitor/cli';
@@ -89,7 +126,31 @@ const config: CapacitorConfig = {
 export default config;
 ```
 
-> **Wichtig:** Die `appId` (z.B. `com.salaryperspective.app`) kann nach der ersten Veröffentlichung **nicht mehr geändert** werden. Wähle sie sorgfältig.
+> Falls der `server`-Block fehlt, füge ihn manuell hinzu. `androidScheme: 'https'` sorgt dafür, dass die App HTTPS verwendet, was für manche Browser-APIs (z.B. localStorage) wichtig ist.
+
+### 2.4 Android-Plattform hinzufügen
+
+Dieser Befehl erstellt den kompletten `android/`-Ordner mit einem fertigen Android-Studio-Projekt:
+
+```bash
+npx cap add android
+```
+
+Das Ergebnis ist ein neuer Ordner `android/` im Projekt, der ein vollständiges Android-Projekt enthält. Diesen Ordner kannst du später mit Android Studio öffnen.
+
+### 2.5 Erster Sync
+
+Zuletzt muss die Web-App einmal gebaut und in das Android-Projekt kopiert werden:
+
+```bash
+# Web-App bauen (erzeugt den dist/-Ordner)
+npm run build
+
+# Web-Build in das Android-Projekt kopieren
+npx cap sync android
+```
+
+`cap sync` kopiert den Inhalt von `dist/` in das Android-Projekt und aktualisiert die nativen Abhängigkeiten. Diesen Befehl musst du **nach jeder Code-Änderung** erneut ausführen, bevor du die App testest oder baust.
 
 ---
 
