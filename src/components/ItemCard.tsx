@@ -12,7 +12,8 @@ interface ItemCardProps {
 // Memoize to skip re-renders when item and salary haven't changed (rerender-memo)
 export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
   const salary = useStore((s) => s.salary)
-  const percent = calcPercent(item.price, salary)
+  const salaryMode = useStore((s) => s.salaryMode)
+  const percent = calcPercent(item.price, salary, salaryMode)
 
   return (
     <div className="item-card flex items-start gap-3 rounded-xl bg-card border border-border/50 p-3.5 shadow-sm">

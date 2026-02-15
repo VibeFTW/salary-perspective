@@ -64,8 +64,14 @@ export const useStore = create<AppState>()(
   )
 )
 
-/** Calculate the percentage of salary that an item price represents */
-export function calcPercent(price: number, salary: number): number {
-  if (salary <= 0) return 0
-  return (price / salary) * 100
+/** Normalise salary to a monthly value regardless of the input mode */
+export function toMonthlySalary(salary: number, mode: SalaryMode): number {
+  return mode === 'yearly' ? salary / 12 : salary
+}
+
+/** Calculate the percentage of *monthly* salary that an item price represents */
+export function calcPercent(price: number, salary: number, mode: SalaryMode): number {
+  const monthly = toMonthlySalary(salary, mode)
+  if (monthly <= 0) return 0
+  return (price / monthly) * 100
 }
