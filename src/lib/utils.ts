@@ -18,15 +18,17 @@ export function formatEUR(value: number): string {
 
 /**
  * Format percentage for display in German locale.
- * E.g. 0.05 -> "0,05%", 50 -> "50,00%"
+ * < 10%: one decimal place  (e.g. "4,2%", "0,3%")
+ * >= 10%: no decimals       (e.g. "42%", "100%")
  */
 export function formatPercent(value: number): string {
-  if (value < 0.01 && value > 0) {
-    return '< 0,01%'
+  if (value < 0.1 && value > 0) {
+    return '< 0,1%'
   }
+  const decimals = value >= 10 ? 0 : 1
   return value.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }) + '%'
 }
 
