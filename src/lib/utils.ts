@@ -45,9 +45,9 @@ export function parseGermanNumber(value: string): number {
  * Uses 8-hour work days for readability.
  *
  * Examples:
- *   0.001 -> "4 Sek"
- *   0.012 -> "43 Sek"
- *   0.1   -> "6 Min"
+ *   0.001 -> "4 Sek"       (< 1 min: show seconds)
+ *   0.012 -> "43 Sek"      (< 1 min: show seconds)
+ *   0.1   -> "6 Min"       (>= 1 min: minutes only)
  *   0.5   -> "30 Min"
  *   2.75  -> "2 Std 45 Min"
  *   12    -> "1 Tag 4 Std"
@@ -63,12 +63,10 @@ export function formatWorkTime(totalHours: number): string {
     return `${totalSeconds} Sek`
   }
 
-  const totalMinutes = Math.floor(totalSeconds / 60)
-  const remainingSeconds = totalSeconds % 60
+  const totalMinutes = Math.round(totalSeconds / 60)
 
   if (totalMinutes < 60) {
-    if (remainingSeconds === 0) return `${totalMinutes} Min`
-    return `${totalMinutes} Min ${remainingSeconds} Sek`
+    return `${totalMinutes} Min`
   }
 
   const days = Math.floor(totalHours / HOURS_PER_DAY)
