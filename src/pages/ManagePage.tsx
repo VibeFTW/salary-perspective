@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useStore } from '@/store/useStore'
 import { Button } from '@/components/ui/button'
 import { ItemForm } from '@/components/ItemForm'
@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
   RotateCcw,
+  Clock,
 } from 'lucide-react'
 
 export function ManagePage() {
@@ -18,11 +19,53 @@ export function ManagePage() {
   const updateItem = useStore((s) => s.updateItem)
   const deleteItem = useStore((s) => s.deleteItem)
   const resetItems = useStore((s) => s.resetItems)
+  const hoursPerWeek = useStore((s) => s.hoursPerWeek)
+  const setHoursPerWeek = useStore((s) => s.setHoursPerWeek)
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   // Key forces ItemForm to re-mount with fresh state (rerender-derived-state-no-effect)
   const [formKey, setFormKey] = useState(0)
+
+  // --- Hours-per-week input state (same pattern as SalaryInput) ---
+  const [hoursInput, setHoursInput] = useState(() =>
+    hoursPerWeek.toString().replace('.', ',')
+  )
+  const hoursIsFocusedRef = useRef(false)
+
+  useEffect(() => {
+    if (!hoursIsFocusedRef.current) {
+      setHoursInput(hoursPerWeek.toString().replace('.', ','))
+    }
+  }, [hoursPerWeek])
+
+  const handleHoursFocus = useCallback(() => {
+    hoursIsFocusedRef.current = true
+    const current = useStore.getState().hoursPerWeek
+    setHoursInput(current === 0 ? '' : current.toString().replace('.', ','))
+  }, [])
+
+  const handleHoursBlur = useCallback(() => {
+    hoursIsFocusedRef.current = false
+    setHoursInput((current) => {
+      const parsed = parseFloat(current.replace(',', '.')) || 0
+      const clamped = Math.max(0, Math.min(168, parsed))
+      setHoursPerWeek(clamped)
+      return clamped.toString().replace('.', ',')
+    })
+  }, [setHoursPerWeek])
+
+  const handleHoursChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value
+      setHoursInput(raw)
+      const parsed = parseFloat(raw.replace(',', '.'))
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 168) {
+        setHoursPerWeek(parsed)
+      }
+    },
+    [setHoursPerWeek]
+  )
 
   const handleAdd = () => {
     setEditingItem(null)
@@ -70,6 +113,40 @@ export function ManagePage() {
           </div>
         </div>
       </header>
+
+      {/* Settings section */}
+      <div className="mx-auto w-full max-w-lg px-4 pt-4 pb-2">
+        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold">Einstellungen</h2>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="hours-per-week" className="text-xs font-medium text-muted-foreground">
+              Arbeitsstunden pro Woche
+            </label>
+            <div className="relative">
+              <input
+                id="hours-per-week"
+                type="text"
+                inputMode="decimal"
+                value={hoursInput}
+                onChange={handleHoursChange}
+                onFocus={handleHoursFocus}
+                onBlur={handleHoursBlur}
+                placeholder="40"
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 pr-16 text-base font-semibold ring-offset-background placeholder:text-muted-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                Std / Woche
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Wird zur Berechnung der Arbeitszeit pro Artikel genutzt (× 52 Wochen)
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Add button */}
       <div className="mx-auto w-full max-w-lg px-4 py-3">

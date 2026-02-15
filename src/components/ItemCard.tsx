@@ -1,9 +1,10 @@
 import { memo } from 'react'
 import { Item } from '@/types'
-import { useStore, calcPercent } from '@/store/useStore'
-import { formatEUR, formatPercent } from '@/lib/utils'
+import { useStore, calcPercent, calcWorkHours } from '@/store/useStore'
+import { formatEUR, formatPercent, formatWorkTime } from '@/lib/utils'
 import { PercentBar } from './PercentBar'
 import { categoryIconsMedium } from './categoryIcons'
+import { Clock } from 'lucide-react'
 
 interface ItemCardProps {
   item: Item
@@ -13,7 +14,9 @@ interface ItemCardProps {
 export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
   const salary = useStore((s) => s.salary)
   const salaryMode = useStore((s) => s.salaryMode)
+  const hoursPerWeek = useStore((s) => s.hoursPerWeek)
   const percent = calcPercent(item.price, salary, salaryMode)
+  const workHours = calcWorkHours(item.price, salary, salaryMode, hoursPerWeek)
 
   return (
     <div className="item-card flex items-start gap-3 rounded-xl bg-card border border-border/50 p-3.5 shadow-sm">
@@ -47,6 +50,14 @@ export const ItemCard = memo(function ItemCard({ item }: ItemCardProps) {
             {formatPercent(percent)}
           </span>
         </div>
+
+        {/* Work time */}
+        {hoursPerWeek > 0 && (
+          <div className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{formatWorkTime(workHours)}</span>
+          </div>
+        )}
       </div>
     </div>
   )

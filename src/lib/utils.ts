@@ -39,3 +39,44 @@ export function parseGermanNumber(value: string): number {
   const num = parseFloat(cleaned)
   return isNaN(num) ? 0 : num
 }
+
+/**
+ * Format a number of working hours into a human-friendly German string.
+ * Uses 8-hour work days for readability.
+ *
+ * Examples:
+ *   0.5   -> "30 Min"
+ *   2.75  -> "2 Std 45 Min"
+ *   12    -> "1 Tag 4 Std"
+ *   96    -> "12 Tage"
+ */
+export function formatWorkTime(totalHours: number): string {
+  if (totalHours <= 0) return '–'
+
+  const HOURS_PER_DAY = 8
+  const totalMinutes = Math.round(totalHours * 60)
+
+  if (totalMinutes < 60) {
+    return `${totalMinutes} Min`
+  }
+
+  const days = Math.floor(totalHours / HOURS_PER_DAY)
+  const remainingHours = Math.floor(totalHours % HOURS_PER_DAY)
+  const remainingMinutes = totalMinutes % 60
+
+  if (days === 0) {
+    // Less than one work day: show hours + minutes
+    if (remainingMinutes === 0) return `${remainingHours} Std`
+    return `${remainingHours} Std ${remainingMinutes} Min`
+  }
+
+  // One or more work days
+  const dayLabel = days === 1 ? 'Tag' : 'Tage'
+  if (remainingHours === 0 && remainingMinutes === 0) {
+    return `${days} ${dayLabel}`
+  }
+  if (remainingHours === 0) {
+    return `${days} ${dayLabel} ${remainingMinutes} Min`
+  }
+  return `${days} ${dayLabel} ${remainingHours} Std`
+}
