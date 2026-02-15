@@ -52,11 +52,97 @@ Du brauchst nur:
 
 ### Option B: Lokale Installation (klassisch)
 
-- [ ] **Node.js** (v18+) und **npm** installiert
-- [ ] **Android Studio** installiert ([Download](https://developer.android.com/studio))
-- [ ] **JDK 17+** installiert (kommt mit Android Studio)
-- [ ] **Google Play Developer Account** ([Registrieren](https://play.google.com/console) — einmalig 25 USD)
-- [ ] Die App läuft lokal fehlerfrei (`npm run dev`)
+Folge den Schritten der Reihe nach. Jeder Schritt enthält einen **Prüfbefehl**, mit dem du sicherstellst, dass alles korrekt installiert ist.
+
+#### B.1 Node.js (v18+) und npm
+
+Node.js wird benötigt, um die Web-App zu bauen und Capacitor zu verwenden. npm (der Paketmanager) wird automatisch mitinstalliert.
+
+1. Lade Node.js herunter: [nodejs.org/en/download](https://nodejs.org/en/download/) — wähle die **LTS**-Version
+2. Führe den Installer aus (alle Standardeinstellungen sind OK)
+3. **Schließe dein Terminal und öffne ein neues** (damit die PATH-Änderungen wirken)
+4. Prüfe die Installation:
+
+```powershell
+node --version   # Erwartete Ausgabe: v18.x.x oder höher
+npm --version    # Erwartete Ausgabe: 9.x.x oder höher
+```
+
+> Falls die Befehle nicht erkannt werden: Starte den PC neu und versuche es erneut.
+
+#### B.2 Android Studio
+
+Android Studio wird benötigt, um das Android-Projekt zu öffnen und die signierte AAB-Datei zu erstellen. Es bringt außerdem ein **JDK** (Java Development Kit) mit, das für den Keystore-Schritt später gebraucht wird.
+
+1. Lade Android Studio herunter: [developer.android.com/studio](https://developer.android.com/studio)
+2. Führe den Installer aus. Beim **Setup-Wizard** (erster Start):
+   - Wähle **Standard**-Installation
+   - Akzeptiere alle SDK-Lizenzen
+   - Warte, bis alle Komponenten heruntergeladen sind (kann 5–15 Minuten dauern)
+3. Nach der Installation: Öffne Android Studio einmal und lass den initialen Setup durchlaufen
+
+#### B.3 JDK verfügbar machen (für `keytool`)
+
+Android Studio installiert ein JDK, aber fügt es **nicht** automatisch zum System-PATH hinzu. Das bedeutet, dass Befehle wie `keytool` im Terminal noch nicht funktionieren.
+
+**Prüfe zuerst**, ob `keytool` bereits funktioniert:
+
+```powershell
+keytool -help
+```
+
+Wenn du eine **Hilfeseite** siehst → alles gut, weiter mit B.4.
+
+Wenn du **"keytool wird nicht erkannt"** (oder ähnlich) siehst → füge das JDK zum PATH hinzu:
+
+**Variante 1 — Android Studio JDK verwenden (kein Extra-Download):**
+
+Das JDK von Android Studio liegt typischerweise hier:
+```
+C:\Program Files\Android\Android Studio\jbr\bin
+```
+
+Füge diesen Pfad zur PATH-Umgebungsvariable hinzu:
+1. Drücke `Win + R`, tippe `sysdm.cpl` und drücke Enter
+2. Reiter **Erweitert** → **Umgebungsvariablen**
+3. Unter **Benutzervariablen** (oben): Wähle `Path` → **Bearbeiten** → **Neu**
+4. Füge den Pfad ein: `C:\Program Files\Android\Android Studio\jbr\bin`
+5. Klicke überall **OK**
+6. **Schließe dein Terminal und öffne ein neues**
+7. Prüfe erneut:
+
+```powershell
+keytool -help   # Sollte jetzt die Hilfeseite anzeigen
+java --version  # Sollte Java 17+ anzeigen
+```
+
+**Variante 2 — Eigenständiges JDK installieren:**
+
+Falls du den Android-Studio-Pfad nicht findest, kannst du ein JDK separat installieren:
+1. Lade Adoptium/Temurin JDK 17 herunter: [adoptium.net](https://adoptium.net/) — wähle **JDK 17 LTS**
+2. Im Installer: Aktiviere **"Add to PATH"** und **"Set JAVA_HOME"**
+3. Terminal neu öffnen und prüfen:
+
+```powershell
+keytool -help
+java --version
+```
+
+#### B.4 Google Play Developer Account
+
+- [ ] Registriere dich unter [play.google.com/console](https://play.google.com/console) (einmalig **25 USD**)
+- [ ] Die Identitätsverifizierung kann einige Tage dauern — starte diesen Schritt frühzeitig
+
+#### B.5 Projekt prüfen
+
+Stelle sicher, dass die App lokal fehlerfrei läuft:
+
+```powershell
+npm install      # Abhängigkeiten installieren (falls noch nicht geschehen)
+npm run dev      # Entwicklungsserver starten — App im Browser prüfen
+```
+
+> Wenn `npm run dev` funktioniert und die App im Browser läuft, bist du bereit für Schritt 2.
 
 ---
 
@@ -170,21 +256,60 @@ Für den Splash Screen:
 
 ## 4. Release-Keystore erstellen
 
-Der Keystore wird zum Signieren der App benötigt. **Bewahre ihn sicher auf** — ohne ihn kannst du keine Updates veröffentlichen!
+> **Hinweis:** Wenn du den **Docker-Build** nutzt, kannst du diesen Abschnitt überspringen — der Container erstellt den Keystore automatisch.
 
-```bash
+### Was ist ein Keystore?
+
+Ein Keystore ist eine verschlüsselte Datei, die deinen **digitalen Signaturschlüssel** enthält. Jede App im Play Store muss signiert sein — das beweist, dass Updates wirklich von dir kommen. Ohne den Keystore kannst du **keine Updates** für deine App veröffentlichen.
+
+### 4.1 Keystore generieren
+
+Der Befehl `keytool` stammt aus dem **JDK** (Java Development Kit), das du in [Schritt B.3](#b3-jdk-verfügbar-machen-für-keytool) eingerichtet hast.
+
+**Prüfe zuerst**, ob `keytool` verfügbar ist:
+
+```powershell
+keytool -help
+```
+
+Falls der Befehl nicht erkannt wird, gehe zurück zu [Schritt B.3](#b3-jdk-verfügbar-machen-für-keytool) und stelle sicher, dass das JDK im PATH ist.
+
+Wenn `keytool` funktioniert, führe folgenden Befehl **im Projektordner** aus:
+
+```powershell
 keytool -genkey -v -keystore salary-perspective-release.keystore -alias salary-perspective -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Du wirst nach einem Passwort gefragt. **Merke dir das Passwort!**
+| Parameter | Bedeutung |
+|---|---|
+| `-keystore salary-perspective-release.keystore` | Name der Keystore-Datei, die erstellt wird |
+| `-alias salary-perspective` | Ein Name für den Schlüssel innerhalb des Keystores |
+| `-keyalg RSA -keysize 2048` | Verschlüsselungsalgorithmus und Schlüssellänge |
+| `-validity 10000` | Gültigkeit in Tagen (~27 Jahre) |
 
-> ⚠️ **NIEMALS** den Keystore in Git committen! Füge ihn zur `.gitignore` hinzu:
-> ```
-> *.keystore
-> *.jks
-> ```
+Der Befehl fragt dich interaktiv nach:
+1. **Keystore-Passwort** — wähle ein sicheres Passwort und **schreibe es auf** (z.B. in einem Passwort-Manager)
+2. **Vor- und Nachname, Organisation, Ort, Land** — du kannst hier einfach Enter drücken oder frei ausfüllen. Diese Angaben sind **nicht** öffentlich sichtbar.
+3. **Bestätigung** — tippe `ja` oder `yes`
 
-Erstelle eine Datei `android/key.properties` (ebenfalls NICHT committen):
+Nach Abschluss liegt eine neue Datei `salary-perspective-release.keystore` im Projektordner.
+
+### 4.2 Keystore vor Git schützen
+
+Der Keystore enthält deinen privaten Schlüssel und darf **niemals** in Git landen.
+
+Prüfe, ob deine `.gitignore` bereits diese Einträge enthält — falls nicht, füge sie hinzu:
+
+```
+*.keystore
+*.jks
+```
+
+### 4.3 Signing-Konfiguration anlegen
+
+Damit Android Studio den Keystore beim Bauen verwenden kann, braucht es zwei Dinge:
+
+**Schritt 1:** Erstelle die Datei `android/key.properties` mit folgendem Inhalt (ersetze `DEIN_PASSWORT` durch dein gewähltes Keystore-Passwort):
 
 ```properties
 storePassword=DEIN_PASSWORT
@@ -193,17 +318,20 @@ keyAlias=salary-perspective
 storeFile=../../salary-perspective-release.keystore
 ```
 
-Füge in `android/app/build.gradle` die Signing-Config hinzu:
+> Diese Datei ebenfalls **NICHT** committen — sie enthält dein Passwort im Klartext!
+
+**Schritt 2:** Öffne die Datei `android/app/build.gradle` und füge die Signing-Config hinzu. Suche den `android {`-Block und ergänze die markierten Abschnitte:
 
 ```gradle
-// Vor dem android { Block:
+// Diese drei Zeilen VOR den android { Block einfügen:
 def keystorePropertiesFile = rootProject.file("key.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-    // ...
+    // ... bestehender Inhalt ...
 
+    // Diesen Block innerhalb von android { } einfügen:
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -217,11 +345,15 @@ android {
         release {
             signingConfig signingConfigs.release
             minifyEnabled true
-            // ...
+            // ... bestehender Inhalt ...
         }
     }
 }
 ```
+
+### 4.4 Keystore sicher aufbewahren
+
+> **Wichtig:** Bewahre eine Kopie des Keystores und des Passworts an einem sicheren Ort auf (Passwort-Manager, verschlüsselter USB-Stick, etc.). Wenn du den Keystore verlierst, kannst du keine Updates mehr für die App veröffentlichen und müsstest eine komplett neue App anlegen.
 
 ---
 
