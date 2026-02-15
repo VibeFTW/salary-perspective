@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Item, SalaryMode, Category } from '@/types'
+import { Item, SalaryMode, SortMode, Category } from '@/types'
 import { defaultItems } from '@/data/defaultItems'
 
 interface AppState {
@@ -9,11 +9,13 @@ interface AppState {
   hoursPerWeek: number
   items: Item[]
   activeCategory: Category | 'alle'
+  sortMode: SortMode
 
   setSalary: (salary: number) => void
   setSalaryMode: (mode: SalaryMode) => void
   setHoursPerWeek: (hours: number) => void
   setActiveCategory: (category: Category | 'alle') => void
+  setSortMode: (sortMode: SortMode) => void
   addItem: (item: Omit<Item, 'id' | 'sortOrder'>) => void
   updateItem: (id: string, updates: Partial<Omit<Item, 'id'>>) => void
   deleteItem: (id: string) => void
@@ -28,11 +30,13 @@ export const useStore = create<AppState>()(
       hoursPerWeek: 40,
       items: defaultItems,
       activeCategory: 'alle',
+      sortMode: 'default',
 
       setSalary: (salary) => set({ salary }),
       setSalaryMode: (salaryMode) => set({ salaryMode }),
       setHoursPerWeek: (hoursPerWeek) => set({ hoursPerWeek }),
       setActiveCategory: (activeCategory) => set({ activeCategory }),
+      setSortMode: (sortMode) => set({ sortMode }),
 
       addItem: (item) =>
         set((state) => {
@@ -63,11 +67,14 @@ export const useStore = create<AppState>()(
     {
       name: 'salary-perspective-storage',
       // Version localStorage data for safe schema evolution (client-localstorage-schema)
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 2) {
           state.hoursPerWeek = 40
+        }
+        if (version < 3) {
+          state.sortMode = 'default'
         }
         return state as AppState
       },

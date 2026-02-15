@@ -1,5 +1,6 @@
 import { SalaryInput } from '@/components/SalaryInput'
 import { CategoryFilter } from '@/components/CategoryFilter'
+import { SortToggle } from '@/components/SortToggle'
 import { ItemList } from '@/components/ItemList'
 import { Percent } from 'lucide-react'
 
@@ -19,10 +20,15 @@ export function HomePage() {
         </div>
       </header>
 
-      {/* Category filter */}
+      {/* Category filter + sort */}
       <div className="sticky top-[calc(var(--header-h,220px))] z-20 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-lg px-4 py-3">
-          <CategoryFilter />
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+              <CategoryFilter />
+            </div>
+            <SortToggle />
+          </div>
         </div>
       </div>
 

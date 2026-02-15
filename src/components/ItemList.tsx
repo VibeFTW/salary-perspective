@@ -5,6 +5,7 @@ export function ItemList() {
   const items = useStore((s) => s.items)
   const activeCategory = useStore((s) => s.activeCategory)
   const salary = useStore((s) => s.salary)
+  const sortMode = useStore((s) => s.sortMode)
 
   const filtered =
     activeCategory === 'alle'
@@ -12,7 +13,12 @@ export function ItemList() {
       : items.filter((item) => item.category === activeCategory)
 
   // Use toSorted() for immutability — avoids mutating original array (js-tosorted-immutable)
-  const sorted = filtered.toSorted((a, b) => a.sortOrder - b.sortOrder)
+  // Sorting by price is equivalent to sorting by percentage/work-time (same salary divisor)
+  const sorted = filtered.toSorted((a, b) => {
+    if (sortMode === 'asc') return a.price - b.price
+    if (sortMode === 'desc') return b.price - a.price
+    return a.sortOrder - b.sortOrder
+  })
 
   if (salary <= 0) {
     return (
