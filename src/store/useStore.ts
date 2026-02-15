@@ -103,7 +103,7 @@ export const useStore = create<AppState>()(
           // Re-apply default items to pick up corrected sortOrder values
           state.items = defaultItems
         }
-        return state as AppState
+        return state as unknown as AppState
       },
     }
   )
