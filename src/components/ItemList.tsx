@@ -1,11 +1,15 @@
-import { useStore } from '@/store/useStore'
+import { useStore, toMonthlySalary } from '@/store/useStore'
+import { formatEUR } from '@/lib/utils'
 import { ItemCard } from './ItemCard'
+import { Info } from 'lucide-react'
 
 export function ItemList() {
   const items = useStore((s) => s.items)
   const activeCategory = useStore((s) => s.activeCategory)
   const salary = useStore((s) => s.salary)
+  const salaryMode = useStore((s) => s.salaryMode)
   const sortMode = useStore((s) => s.sortMode)
+  const monthlySalary = toMonthlySalary(salary, salaryMode)
 
   const filtered =
     activeCategory === 'alle'
@@ -45,6 +49,23 @@ export function ItemList() {
 
   return (
     <div className="space-y-2">
+      {/* Monthly salary basis banner */}
+      <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+        <Info className="h-3.5 w-3.5 shrink-0" />
+        <span>
+          Werte basieren auf{' '}
+          <span className="font-semibold text-foreground">
+            {formatEUR(monthlySalary)} €
+          </span>{' '}
+          / Monat
+          {salaryMode === 'yearly' && (
+            <span className="ml-1">
+              ({formatEUR(salary)} € / Jahr ÷ 12)
+            </span>
+          )}
+        </span>
+      </div>
+
       {sorted.map((item) => (
         <ItemCard key={item.id} item={item} />
       ))}
