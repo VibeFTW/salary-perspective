@@ -67,7 +67,7 @@ export const useStore = create<AppState>()(
     {
       name: 'salary-perspective-storage',
       // Version localStorage data for safe schema evolution (client-localstorage-schema)
-      version: 4,
+      version: 5,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 2) {
@@ -76,8 +76,8 @@ export const useStore = create<AppState>()(
         if (version < 3) {
           state.sortMode = 'default'
         }
-        if (version < 4) {
-          // Re-apply default items with new featured sort order
+        if (version < 5) {
+          // Re-apply default items with new featured sort order + high-value items
           state.items = defaultItems
         }
         return state as AppState

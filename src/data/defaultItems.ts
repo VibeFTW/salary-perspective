@@ -58,6 +58,22 @@ export const defaultItems: Item[] = [
     category: 'freizeit',
     sortOrder: 7,
   },
+  {
+    id: 'e-bike',
+    name: 'E-Bike',
+    description: 'Mittelklasse',
+    price: 3500.00,
+    category: 'freizeit',
+    sortOrder: 8,
+  },
+  {
+    id: 'gebrauchtwagen',
+    name: 'Gebrauchtwagen',
+    description: '5 Jahre alt',
+    price: 8000.00,
+    category: 'wohnen',
+    sortOrder: 9,
+  },
 
   // === ESSEN === (remaining)
   {
@@ -302,6 +318,30 @@ export const defaultItems: Item[] = [
     category: 'wohnen',
     sortOrder: 41,
   },
+  {
+    id: 'neue-kueche',
+    name: 'Neue Küche',
+    description: 'Einbauküche',
+    price: 8000.00,
+    category: 'wohnen',
+    sortOrder: 42,
+  },
+  {
+    id: 'neuwagen',
+    name: 'Neuwagen',
+    description: 'Mittelklasse',
+    price: 35000.00,
+    category: 'wohnen',
+    sortOrder: 43,
+  },
+  {
+    id: 'anzahlung-wohnung',
+    name: 'Anzahlung Eigentumswohnung',
+    description: 'Eigenkapital',
+    price: 50000.00,
+    category: 'wohnen',
+    sortOrder: 43.5,
+  },
 
   // === TECHNIK === (remaining)
   {
@@ -481,5 +521,29 @@ export const defaultItems: Item[] = [
     price: 20.00,
     category: 'freizeit',
     sortOrder: 67,
+  },
+  {
+    id: 'rolex',
+    name: 'Rolex',
+    description: 'Submariner',
+    price: 10000.00,
+    category: 'freizeit',
+    sortOrder: 68,
+  },
+  {
+    id: 'weltreise',
+    name: 'Weltreise',
+    description: '3 Monate',
+    price: 12000.00,
+    category: 'freizeit',
+    sortOrder: 69,
+  },
+  {
+    id: 'hochzeit',
+    name: 'Hochzeit',
+    description: 'Durchschnitt Deutschland',
+    price: 15000.00,
+    category: 'freizeit',
+    sortOrder: 70,
   },
 ]
