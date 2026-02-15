@@ -24,8 +24,14 @@ export function ItemList() {
   }
 
   // Use toSorted() for immutability — avoids mutating original array (js-tosorted-immutable)
-  // Sorting by price is equivalent to sorting by percentage/work-time (same salary divisor)
+  // Favorites are always pinned to the top (in default order); sort only applies to non-favorites
   const sorted = filtered.toSorted((a, b) => {
+    const aFav = favoriteIds.includes(a.id)
+    const bFav = favoriteIds.includes(b.id)
+    // Favorites always come first
+    if (aFav !== bFav) return aFav ? -1 : 1
+    // Among favorites, keep default order; among non-favorites, apply sort mode
+    if (aFav) return a.sortOrder - b.sortOrder
     if (sortMode === 'asc') return a.price - b.price
     if (sortMode === 'desc') return b.price - a.price
     return a.sortOrder - b.sortOrder
