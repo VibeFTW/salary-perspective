@@ -14,7 +14,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript&logoColor=white" />
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?logo=tailwindcss&logoColor=white" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white" />
-  <img alt="Capacitor" src="https://img.shields.io/badge/Capacitor-Android-119eff?logo=capacitor&logoColor=white" />
+  <img alt="PWA" src="https://img.shields.io/badge/PWA-Bubblewrap-6a1b9a?logo=googlechrome&logoColor=white" />
 </p>
 
 ---
@@ -83,7 +83,7 @@ Fertige Assets für den Play Store liegen im `assets/` Ordner:
 - 🎨 **Tailwind CSS** + **shadcn/ui** — schöne, responsive Komponenten
 - 🧠 **Zustand** — leichtgewichtiges State Management mit localStorage
 - 🧭 **React Router v6** — zwei Seiten: Startseite + Verwaltung
-- 📱 **Capacitor** — Web-App als Android-App im Play Store
+- 📱 **Bubblewrap (TWA)** — PWA als Android-App im Play Store
 - 🎯 **Lucide React** — Icon-Bibliothek
 
 ---
@@ -104,14 +104,22 @@ npm run build
 npm run preview
 ```
 
-### Android-Build (Capacitor)
+### PWA / Android-Build (Bubblewrap)
+
+Die App wird als PWA deployed und mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) als TWA (Trusted Web Activity) in den Play Store gebracht — kein Android Studio nötig.
 
 ```bash
-npx cap init salary-perspective com.salaryperspective.app
-npx cap add android
+# 1. Web-App bauen (inkl. Service Worker & Manifest)
 npm run build
-npx cap sync android
-npx cap open android    # Öffnet Android Studio
+
+# 2. Auf https://salary-perspective.engelportal.de deployen
+
+# 3. Bubblewrap CLI installieren (einmalig)
+npm i -g @bubblewrap/cli
+
+# 4. Android-Projekt generieren & AAB bauen
+bubblewrap init --manifest="https://salary-perspective.engelportal.de/manifest.webmanifest"
+bubblewrap build
 ```
 
 Für die vollständige Play Store Anleitung siehe [PUBLISHING.md](PUBLISHING.md).

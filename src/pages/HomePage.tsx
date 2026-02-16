@@ -14,7 +14,7 @@ export function HomePage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
               <Coins className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-lg font-bold">GehaltsBlick</h1>
+            <h1 className="text-lg font-bold">Gehaltsperspektive</h1>
           </div>
           <SalaryInput />
         </div>

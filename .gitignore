@@ -3,17 +3,14 @@ dist
 .env
 .env.local
 *.local
-android
-ios
 
 # Keystore & signing secrets — NEVER commit these
 *.keystore
 *.jks
 keystore/
-android/key.properties
 
-# Docker build output
-output/
+# Bubblewrap build output (generated Android project)
+.build/
 
 # Editor
 .vscode/*
