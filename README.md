@@ -14,7 +14,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript&logoColor=white" />
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?logo=tailwindcss&logoColor=white" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white" />
-  <img alt="PWA" src="https://img.shields.io/badge/PWA-Bubblewrap-6a1b9a?logo=googlechrome&logoColor=white" />
+  <img alt="PWA" src="https://img.shields.io/badge/PWA-PWABuilder-6a1b9a?logo=googlechrome&logoColor=white" />
 </p>
 
 ---
@@ -83,7 +83,7 @@ Fertige Assets für den Play Store liegen im `assets/` Ordner:
 - 🎨 **Tailwind CSS** + **shadcn/ui** — schöne, responsive Komponenten
 - 🧠 **Zustand** — leichtgewichtiges State Management mit localStorage
 - 🧭 **React Router v6** — zwei Seiten: Startseite + Verwaltung
-- 📱 **Bubblewrap (TWA)** — PWA als Android-App im Play Store
+- 📱 **PWABuilder** — PWA als Android-App im Play Store (via [pwabuilder.com](https://www.pwabuilder.com/))
 - 🎯 **Lucide React** — Icon-Bibliothek
 
 ---
@@ -104,22 +104,18 @@ npm run build
 npm run preview
 ```
 
-### PWA / Android-Build (Bubblewrap)
+### PWA / Android-Build (PWABuilder)
 
-Die App wird als PWA deployed und mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) als TWA (Trusted Web Activity) in den Play Store gebracht — kein Android Studio nötig.
+Die App wird als PWA deployed und mit [PWABuilder](https://www.pwabuilder.com/) als TWA in den Play Store gebracht — kein Android Studio, kein CLI-Tool nötig.
 
 ```bash
 # 1. Web-App bauen (inkl. Service Worker & Manifest)
 npm run build
 
-# 2. Auf https://salary-perspective.engelportal.de deployen
+# 2. dist/ auf https://salary-perspective.engelportal.de deployen
 
-# 3. Bubblewrap CLI installieren (einmalig)
-npm i -g @bubblewrap/cli
-
-# 4. Android-Projekt generieren & AAB bauen
-bubblewrap init --manifest="https://salary-perspective.engelportal.de/manifest.webmanifest"
-bubblewrap build
+# 3. pwabuilder.com öffnen → URL eingeben → "Package for stores" → Android
+#    → AAB herunterladen → in Google Play Console hochladen
 ```
 
 Für die vollständige Play Store Anleitung siehe [PUBLISHING.md](PUBLISHING.md).

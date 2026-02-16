@@ -1,143 +1,146 @@
 # 📱 Gehaltsperspektive — Play Store Veröffentlichung
 
-Schritt-für-Schritt-Anleitung zur Veröffentlichung der PWA als Android-App im Google Play Store mit **Bubblewrap** (Trusted Web Activity).
+Schritt-für-Schritt-Anleitung zur Veröffentlichung der PWA als Android-App im Google Play Store mit [**PWABuilder**](https://www.pwabuilder.com/).
 
-## Was ist Bubblewrap / TWA?
+## Warum PWABuilder?
 
-[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) erzeugt eine Android-App, die eine **Trusted Web Activity (TWA)** startet. Die TWA öffnet die gehostete PWA in Chrome — ohne sichtbare Browser-UI. Die App fühlt sich damit wie eine native App an.
+[PWABuilder](https://www.pwabuilder.com/) ist ein kostenloses Tool von Microsoft, das eine gehostete PWA in ein Play-Store-fertiges Android-Paket (AAB) verpackt. Unter der Haube nutzt es Bubblewrap/TWA — aber du musst dafür **nichts installieren**. Alles passiert über eine Web-Oberfläche.
 
-Dieser Ansatz ist ideal, weil:
-
-- **Kein Android Studio nötig** — nur JDK und die Bubblewrap CLI
-- **Winzige APK** (~1-2 MB) — die App lädt den Inhalt von der gehosteten URL
-- **Sofortige Updates** — Code-Änderungen sind live, ohne neuen Play Store Release
-- **Service Worker** sorgt für Offline-Support
-- Chrome auf dem Gerät wird genutzt (aktuellste Engine, kein veralteter WebView)
-
----
-
-## Inhaltsverzeichnis
-
-1. [Voraussetzungen](#1-voraussetzungen)
-2. [PWA deployen](#2-pwa-deployen)
-3. [Bubblewrap einrichten & bauen](#3-bubblewrap-einrichten--bauen)
-4. [Digital Asset Links](#4-digital-asset-links)
-5. [App-Icon](#5-app-icon)
-6. [Release-Keystore](#6-release-keystore)
-7. [Google Play Developer Account](#7-google-play-developer-account)
-8. [App in der Play Console anlegen](#8-app-in-der-play-console-anlegen)
-9. [Store Listing ausfüllen](#9-store-listing-ausfüllen)
-10. [Pflichtangaben in der Play Console](#10-pflichtangaben-in-der-play-console)
-11. [Release hochladen & testen](#11-release-hochladen--testen)
-12. [Veröffentlichung](#12-veröffentlichung)
-13. [Updates veröffentlichen](#13-updates-veröffentlichen)
-14. [Kosten](#kosten)
-15. [Häufige Probleme](#-häufige-probleme)
-16. [Checkliste vor dem Release](#-checkliste-vor-dem-release)
+| Vorteil | Details |
+|---------|---------|
+| **Kein Android Studio** | Nichts installieren, kein JDK, kein SDK |
+| **Kein CLI-Tool** | Kein Bubblewrap, kein Terminal nötig |
+| **Web-UI** | Alles im Browser unter pwabuilder.com |
+| **Winzige APK** | ~1-2 MB — die App lädt Inhalte von der Website |
+| **Sofortige Web-Updates** | Code-Änderungen sind live, ohne neuen Play Store Release |
+| **Offline-Support** | Service Worker sorgt für Offline-Fähigkeit |
 
 ---
 
-## 1. Voraussetzungen
+## Übersicht: 5 Schritte zum Play Store
 
-| Was | Warum | Prüfbefehl |
-|-----|-------|------------|
-| **Node.js 18+** | Bubblewrap CLI | `node --version` |
-| **JDK 17** | APK/AAB signieren | `java --version` |
-| **Bubblewrap CLI** | TWA generieren & bauen | `bubblewrap --version` |
-| **Google Play Developer Account** | App veröffentlichen | [play.google.com/console](https://play.google.com/console) (einmalig 25 USD) |
-
-### JDK installieren
-
-Falls noch nicht vorhanden, installiere Adoptium/Temurin JDK 17:
-
-1. Download: [adoptium.net](https://adoptium.net/) — wähle **JDK 17 LTS**
-2. Im Installer: Aktiviere **"Add to PATH"** und **"Set JAVA_HOME"**
-3. Terminal neu öffnen und prüfen:
-
-```powershell
-java --version     # Java 17+ erwartet
-keytool -help      # Sollte die Hilfeseite zeigen
+```
+1. PWA deployen          → salary-perspective.engelportal.de
+2. PWABuilder öffnen     → URL eingeben, Paket generieren
+3. Digital Asset Links   → assetlinks.json deployen
+4. Play Console          → App anlegen, Store Listing ausfüllen
+5. AAB hochladen         → Testen & veröffentlichen
 ```
 
-### Bubblewrap CLI installieren
-
-```bash
-npm i -g @bubblewrap/cli
-```
-
-Beim ersten Aufruf fragt Bubblewrap, ob es das Android SDK herunterladen soll — bestätige mit **Yes**. Das SDK wird unter `~/.aspect/aspect-build/aspect` (o.ä.) abgelegt (~500 MB).
-
 ---
 
-## 2. PWA deployen
+## Schritt 1: PWA bauen & deployen
 
-Die App muss unter **https://salary-perspective.engelportal.de** erreichbar sein, bevor Bubblewrap die TWA generieren kann.
+Die App muss unter **https://salary-perspective.engelportal.de** öffentlich erreichbar sein.
+
+### 1.1 Produktions-Build erstellen
 
 ```bash
-# Web-App bauen (erzeugt dist/ mit Service Worker & Manifest)
 npm run build
 ```
 
-Deploye den `dist/`-Ordner auf deinen Webserver / Hoster (z.B. Vercel, Netlify, eigener Server).
+Das erzeugt den `dist/`-Ordner mit:
+- Optimiertem HTML/JS/CSS
+- Web-Manifest (`manifest.webmanifest`)
+- Service Worker (automatisch generiert durch `vite-plugin-pwa`)
 
-### Prüfen, ob die PWA korrekt ist
+### 1.2 Deployen
 
-Öffne https://salary-perspective.engelportal.de in Chrome und prüfe in den DevTools:
+Lade den Inhalt von `dist/` auf deinen Webserver hoch (z.B. via FTP, rsync, CI/CD).
 
-1. **Application → Manifest** — Manifest wird korrekt geladen
-2. **Application → Service Workers** — Service Worker ist aktiv
-3. **Lighthouse → PWA** — PWA-Score sollte grün sein
+### 1.3 PWA-Qualität prüfen
 
----
+Öffne https://salary-perspective.engelportal.de in Chrome und prüfe:
 
-## 3. Bubblewrap einrichten & bauen
+1. **DevTools → Application → Manifest** — Manifest wird geladen, Name und Icons sind korrekt
+2. **DevTools → Application → Service Workers** — Service Worker ist aktiv
+3. **Lighthouse → PWA** — alle Checks grün
 
-### 3.1 Projekt initialisieren
+> PWABuilder prüft das ebenfalls und zeigt Warnungen, falls etwas fehlt.
 
-Erstelle einen separaten Ordner für den Android-Build (nicht im Web-Projekt):
+### 1.4 Icons bereitstellen
 
-```bash
-mkdir gehaltsperspektive-android
-cd gehaltsperspektive-android
+Stelle sicher, dass diese Dateien existieren:
 
-bubblewrap init --manifest="https://salary-perspective.engelportal.de/manifest.webmanifest"
-```
+| Datei | Größe | Zweck |
+|-------|-------|-------|
+| `public/icons/icon-192x192.png` | 192x192 | Standard-Icon |
+| `public/icons/icon-512x512.png` | 512x512 | Play Store, Splash, Maskable |
 
-Bubblewrap liest das Manifest und fragt interaktiv nach:
-- **Package ID**: `com.vibeftw.salaryperspective` (bereits in `twa-manifest.json` definiert)
-- **App name**: `Gehaltsperspektive`
-- **Launcher name**: `Gehaltsperspektive`
-- **Theme color, icons, etc.** — werden aus dem Manifest übernommen
-
-> **Tipp:** Alternativ kannst du die `twa-manifest.json` aus dem Projektordner kopieren und `bubblewrap init` damit initialisieren.
-
-### 3.2 AAB bauen
-
-```bash
-bubblewrap build
-```
-
-Die Ausgabe:
-- `app-release-bundle.aab` — für den Play Store
-- `app-release-signed.apk` — zum direkten Testen auf einem Gerät
+> **Maskable Icon:** Der wichtige Inhalt sollte in der inneren 80% (Safe Zone) liegen. Teste mit [maskable.app/editor](https://maskable.app/editor).
 
 ---
 
-## 4. Digital Asset Links
+## Schritt 2: Android-Paket mit PWABuilder generieren
 
-Damit Chrome die App als vertrauenswürdig erkennt (und die Browser-Adressleiste ausblendet), brauchst du eine **Digital Asset Links**-Datei auf deinem Webserver.
+### 2.1 PWABuilder öffnen
 
-### 4.1 SHA-256 Fingerprint ermitteln
+1. Gehe zu **[pwabuilder.com](https://www.pwabuilder.com/)**
+2. Gib die URL ein: `https://salary-perspective.engelportal.de`
+3. Klicke **"Start"**
 
-```bash
-keytool -list -v -keystore ./gehaltsperspektive-release.keystore -alias gehaltsperspektive
+PWABuilder analysiert die Website und prüft:
+- Web-Manifest vorhanden & gültig
+- Service Worker registriert
+- HTTPS aktiv
+- Icons in richtiger Größe
+
+### 2.2 Report prüfen
+
+PWABuilder zeigt einen Score für Manifest, Service Worker und Sicherheit. Alles sollte grün sein. Falls Warnungen angezeigt werden — behebe sie, rebuild und deploy erneut.
+
+### 2.3 Android-Paket generieren
+
+1. Klicke **"Package for stores"**
+2. Wähle **"Android"**
+3. PWABuilder zeigt ein Formular mit vorausgefüllten Werten aus dem Manifest. Prüfe/ändere:
+
+| Feld | Wert |
+|------|------|
+| **Package ID** | `com.vibeftw.salaryperspective` |
+| **App name** | `Gehaltsperspektive` |
+| **App version** | `1.0.0` |
+| **App version code** | `1` |
+| **Host** | `salary-perspective.engelportal.de` |
+| **Start URL** | `/` |
+| **Theme color** | `#0f172a` |
+| **Background color** | `#0f172a` |
+| **Status bar color** | `#0f172a` |
+| **Nav bar color** | `#0f172a` |
+| **Display mode** | `Standalone` |
+| **Signing key** | **"New" → Neuen Signing Key erstellen** (oder vorhandenen hochladen) |
+
+4. Klicke **"Generate"**
+5. **Lade das ZIP-Paket herunter**
+
+### 2.4 ZIP-Inhalt
+
+Das heruntergeladene ZIP enthält:
+
+| Datei | Zweck |
+|-------|-------|
+| `app-release-bundle.aab` | **Das ist die Datei für den Play Store** |
+| `signing-key-info.txt` | Signing Key-Infos — **SICHER AUFBEWAHREN!** |
+| `assetlinks.json` | Digital Asset Links (für Schritt 3) |
+| `README.md` | Anleitung von PWABuilder |
+
+> **WICHTIG:** Sichere `signing-key-info.txt` sofort an einem sicheren Ort (Passwort-Manager). Ohne diesen Key kannst du keine Updates veröffentlichen.
+
+---
+
+## Schritt 3: Digital Asset Links einrichten
+
+Damit die App **ohne Chrome-Adressleiste** angezeigt wird (= echtes App-Feeling), muss dein Webserver beweisen, dass die Android-App dir gehört.
+
+### 3.1 assetlinks.json deployen
+
+PWABuilder hat die Datei bereits generiert (im ZIP unter `assetlinks.json`). Kopiere sie in dein Web-Projekt:
+
+```
+public/.well-known/assetlinks.json
 ```
 
-Kopiere den **SHA-256 Fingerprint** (z.B. `AB:CD:EF:12:34:...`).
-
-### 4.2 assetlinks.json erstellen
-
-Erstelle die Datei unter `public/.well-known/assetlinks.json` im Web-Projekt:
+Die Datei sieht ungefähr so aus:
 
 ```json
 [
@@ -147,105 +150,70 @@ Erstelle die Datei unter `public/.well-known/assetlinks.json` im Web-Projekt:
       "namespace": "android_app",
       "package_name": "com.vibeftw.salaryperspective",
       "sha256_cert_fingerprints": [
-        "DEIN_SHA256_FINGERPRINT_HIER"
+        "AA:BB:CC:DD:..."
       ]
     }
   }
 ]
 ```
 
-### 4.3 Deployen & prüfen
+### 3.2 Neu deployen
 
-Deploye erneut und prüfe:
+```bash
+npm run build
+# dist/ erneut hochladen
+```
+
+### 3.3 Prüfen
+
+Öffne im Browser:
 
 ```
 https://salary-perspective.engelportal.de/.well-known/assetlinks.json
 ```
 
-Die Datei muss mit `Content-Type: application/json` ausgeliefert werden.
+Die Datei muss:
+- Erreichbar sein (kein 404)
+- `Content-Type: application/json` haben
+- Den korrekten SHA-256 Fingerprint enthalten
 
-> **Ohne Asset Links** zeigt die App eine Chrome-Adressleiste an — die App funktioniert trotzdem, sieht aber weniger nativ aus.
-
----
-
-## 5. App-Icon
-
-Du brauchst ein Icon in mindestens zwei Größen:
-
-| Größe | Zweck |
-|-------|-------|
-| 192x192 | Standard-Icon |
-| 512x512 | Play Store, Splash Screen |
-
-Lege die Icons unter `public/icons/` ab:
-- `public/icons/icon-192x192.png`
-- `public/icons/icon-512x512.png`
-
-> Das 512x512-Icon wird auch als **maskable icon** genutzt. Stelle sicher, dass der wichtige Inhalt in der "Safe Zone" (innere 80%) liegt.
+> **Tipp:** Google bietet einen Validator: [digitalassetlinks.googleapis.com](https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://salary-perspective.engelportal.de&relation=delegate_permission/common.handle_all_urls)
 
 ---
 
-## 6. Release-Keystore
+## Schritt 4: Google Play Console einrichten
 
-### 6.1 Keystore generieren
+### 4.1 Developer Account
 
-Bubblewrap erstellt beim ersten `bubblewrap build` automatisch einen Keystore. Du kannst auch manuell einen erstellen:
-
-```bash
-keytool -genkey -v \
-  -keystore gehaltsperspektive-release.keystore \
-  -alias gehaltsperspektive \
-  -keyalg RSA -keysize 2048 \
-  -validity 10000
-```
-
-### 6.2 Keystore sicher aufbewahren
-
-> **WICHTIG:** Ohne den Keystore kannst du keine Updates im Play Store veröffentlichen. Speichere eine Kopie an einem sicheren Ort (Passwort-Manager, verschlüsselter USB-Stick).
-
-Der Keystore und Passwörter dürfen **niemals** committet werden. Die `.gitignore` enthält bereits:
-
-```
-*.keystore
-*.jks
-```
-
----
-
-## 7. Google Play Developer Account
+Falls noch nicht vorhanden:
 
 1. Gehe zu [play.google.com/console](https://play.google.com/console)
 2. Registriere dich (einmalig **25 USD**)
-3. Verifiziere deine Identität (kann einige Tage dauern)
+3. Verifiziere deine Identität (kann einige Tage dauern — frühzeitig starten!)
 
----
-
-## 8. App in der Play Console anlegen
+### 4.2 App anlegen
 
 1. Klicke **"App erstellen"**
 2. Fülle aus:
-   - **App-Name:** Gehaltsperspektive
+   - **App-Name:** `Gehaltsperspektive`
    - **Standardsprache:** Deutsch
    - **App oder Spiel:** App
    - **Kostenlos oder kostenpflichtig:** Kostenlos
-3. Akzeptiere die Richtlinien
-4. Klicke **"App erstellen"**
+3. Akzeptiere die Richtlinien → **"App erstellen"**
 
----
+### 4.3 Store Listing ausfüllen
 
-## 9. Store Listing ausfüllen
-
-### Titel
+**Titel:**
 ```
 Gehaltsperspektive — Was kostet mich das wirklich?
 ```
 
-### Kurzbeschreibung (max. 80 Zeichen)
+**Kurzbeschreibung** (max. 80 Zeichen):
 ```
 Sieh Preise als Prozent deines Gehalts. Dein persönlicher Preis-Check.
 ```
 
-### Vollständige Beschreibung
+**Vollständige Beschreibung:**
 ```
 Was kostet ein Döner wirklich? Und ein iPhone?
 
@@ -268,31 +236,27 @@ Perfekt für Berufseinsteiger, Studenten, oder alle, die ihre Kaufkraft besser v
 ✅ Keine Datenerhebung
 ```
 
-### Grafiken
+**Grafiken:**
 
-Du brauchst:
-- **App-Icon:** 512x512 PNG
-- **Feature-Graphic:** 1024x500 PNG
-- **Screenshots:** Mindestens 2 Screenshots (am besten 4-8)
+| Asset | Spezifikation |
+|-------|---------------|
+| App-Icon | 512x512 PNG (hochauflösend) |
+| Feature-Graphic | 1024x500 PNG |
+| Screenshots | Mind. 2, empfohlen 4-8 (1080x1920 oder 1080x2340) |
 
-### Kategorie
-- **Kategorie:** Finanzen
-- **Tags:** Gehalt, Preisvergleich, Budget, Finanzen, Prozent
+**Kategorie:** Finanzen
 
----
+### 4.4 Pflichtangaben ausfüllen
 
-## 10. Pflichtangaben in der Play Console
+Unter **Richtlinien → App-Inhalte** müssen alle Punkte einen grünen Haken haben:
 
-### 10.1 Inhaltsbewertung (IARC)
+#### Inhaltsbewertung (IARC)
 
-1. Gehe zu **Richtlinien → App-Inhalte → Inhaltsbewertung**
-2. Starte den IARC-Fragebogen
-3. Die App enthält keine Gewalt, sexuellen Inhalte, In-App-Käufe oder Nutzerdaten
-4. Ergebnis: Voraussichtlich **PEGI 3 / USK 0**
+Starte den Fragebogen. Die App enthält keine Gewalt, sexuellen Inhalte, In-App-Käufe oder Nutzerdaten. Ergebnis: **PEGI 3 / USK 0**.
 
-### 10.2 Datenschutzerklärung
+#### Datenschutzerklärung
 
-Da die App **keine Daten erhebt**, ist die Datenschutzerklärung einfach. Erstelle eine öffentlich erreichbare Seite mit:
+Erstelle eine öffentlich erreichbare Seite (z.B. unter `salary-perspective.engelportal.de/privacy`) mit:
 
 ```
 Datenschutzerklärung — Gehaltsperspektive
@@ -309,7 +273,9 @@ enthält keine Tracking- oder Analyse-Tools.
 Kontakt: [deine E-Mail-Adresse]
 ```
 
-### 10.3 Datensicherheit (Data Safety)
+Verlinke die URL in der Play Console.
+
+#### Datensicherheit (Data Safety)
 
 | Frage | Antwort |
 |---|---|
@@ -317,130 +283,154 @@ Kontakt: [deine E-Mail-Adresse]
 | Verschlüsselt die App Daten bei der Übertragung? | Nicht zutreffend |
 | Können Nutzer die Löschung ihrer Daten beantragen? | Nicht zutreffend |
 
-### 10.4 Werbeerklärung
+#### Weitere Angaben
 
-Die App enthält **keine Werbung**.
-
-### 10.5 Zielgruppe & Inhalte
-
-- Die App richtet sich **nicht primär an Kinder**
-- Zielgruppe: 18+ (Gehaltsthema)
+- **Werbung:** Nein
+- **Zielgruppe:** Nicht primär Kinder (18+)
+- **Regierungs-App:** Nein
+- **Finanz-Features:** Nein
 
 ---
 
-## 11. Release hochladen & testen
+## Schritt 5: AAB hochladen & veröffentlichen
 
-1. **Interner Test** (bis zu 100 Tester per E-Mail)
-   - Gehe zu **Testen → Interner Test**
-   - Lade die AAB-Datei hoch (`app-release-bundle.aab`)
-   - Füge Tester hinzu
-   - Starte den Release
+### 5.1 Interner Test (empfohlen)
 
-2. Teste auf einem echten Gerät:
-   - [ ] App startet ohne Fehler
-   - [ ] Keine Chrome-Adressleiste sichtbar (Digital Asset Links korrekt)
-   - [ ] Gehaltseingabe funktioniert
-   - [ ] Kategorien-Filter funktioniert
-   - [ ] Offline-Modus funktioniert (Service Worker)
+1. Gehe zu **Testen → Interner Test → Neuen Release erstellen**
+2. Lade `app-release-bundle.aab` aus dem PWABuilder-ZIP hoch
+3. Füge dich selbst als Tester hinzu (E-Mail-Adresse)
+4. **Release starten**
+5. Installiere die App über den Opt-in-Link auf deinem Gerät
 
----
+### 5.2 Auf dem Gerät prüfen
 
-## 12. Veröffentlichung
+- [ ] App startet ohne Fehler
+- [ ] **Keine Chrome-Adressleiste** sichtbar (Asset Links korrekt)
+- [ ] Gehaltseingabe funktioniert
+- [ ] Kategorien-Filter funktioniert
+- [ ] Artikeldetails mit Prozentbalken korrekt
+- [ ] Eigene Artikel hinzufügen/bearbeiten funktioniert
+- [ ] App funktioniert nach Flugmodus-Aktivierung (Offline via Service Worker)
 
-1. Alle Pflichtfelder ausgefüllt (siehe Checkliste unten)
-2. Gehe zu **Produktion → Neuen Release erstellen**
-3. Lade die AAB hoch
-4. Release-Notizen hinzufügen
-5. **"Rollout für Produktion starten"**
+### 5.3 Produktion
+
+1. Gehe zu **Produktion → Neuen Release erstellen**
+2. Lade die AAB hoch (dieselbe Datei wie beim internen Test)
+3. Release-Notizen:
+   ```
+   Erster Release von Gehaltsperspektive!
+   - 50+ Alltagsgegenstände mit deutschen Preisen
+   - Gehaltseingabe (monatlich/jährlich)
+   - Echtzeit-Prozentberechnung
+   - 4 Kategorien mit Filter
+   - Eigene Artikel hinzufügen & bearbeiten
+   ```
+4. **"Überprüfen"** → **"Rollout für Produktion starten"**
 
 ### Review-Dauer
+
 - Erster Release: **1-7 Tage**
 - Updates: Meist **1-3 Tage**
 
 ---
 
-## 13. Updates veröffentlichen
+## Updates veröffentlichen
 
 ### Web-Updates (kein neuer Play Store Release nötig!)
 
-Der große Vorteil von TWA: **Web-Änderungen sind sofort live**, sobald du die Website aktualisierst. Der Service Worker sorgt für Updates im Hintergrund.
+Der große Vorteil von TWA: **Web-Änderungen sind sofort live**, sobald du die Website aktualisierst. Kein neues AAB nötig.
 
 ```bash
 npm run build
 # dist/ neu deployen → fertig!
 ```
 
-### Android-Shell-Update (neuer AAB nötig)
+Features, Bugfixes, neue Artikel, UI-Änderungen — alles sofort live für alle Nutzer.
 
-Nur bei Änderungen am TWA-Wrapper selbst (z.B. neues Icon, neuer Package Name, neue Bubblewrap-Version):
+### TWA-Shell-Update (neuer AAB nötig)
 
-```bash
-cd gehaltsperspektive-android
-bubblewrap build
-# app-release-bundle.aab in Play Console hochladen
-```
+Nur bei Änderungen an der Android-Hülle selbst (selten):
 
-Erhöhe die `appVersionCode` in `twa-manifest.json` vor jedem neuen AAB-Upload.
+- Neues App-Icon
+- Andere Package ID
+- Geänderte Theme-/Statusbar-Farben
+- Neue Android-Berechtigungen
+
+In diesem Fall: PWABuilder erneut durchlaufen → neues AAB generieren → in Play Console hochladen (mit erhöhtem Version Code).
 
 ---
 
 ## Kosten
 
-### Einmalige Kosten
-
 | Posten | Kosten |
 |---|---|
-| Google Play Developer-Registrierung | **25 USD** |
+| Google Play Developer-Registrierung | **25 USD** (einmalig) |
+| PWABuilder | **Kostenlos** |
+| Web-Hosting | Je nach Hoster (Subdomain von engelportal.de) |
 
-### Laufende Kosten
-
-| Posten | Kosten |
-|---|---|
-| Web-Hosting (salary-perspective.engelportal.de) | Je nach Hoster |
-| Domain | Teil von engelportal.de |
+**Gesamtkosten Minimum: 25 USD einmalig.**
 
 ---
 
 ## ❓ Häufige Probleme
 
-### Chrome-Adressleiste wird angezeigt
+### PWABuilder zeigt Warnungen
 
-- **Digital Asset Links** nicht korrekt eingerichtet
-- Prüfe: `https://salary-perspective.engelportal.de/.well-known/assetlinks.json`
-- SHA-256 Fingerprint muss zum Keystore passen
-- Es kann bis zu 24h dauern, bis Chrome die Asset Links cached
+- **"No service worker found"** → `npm run build` und prüfe, ob der Service Worker im `dist/`-Ordner liegt
+- **"Manifest incomplete"** → Prüfe `vite.config.ts` — alle Pflichtfelder (name, icons, display, start_url) müssen gesetzt sein
+- **"Icons missing"** → `public/icons/icon-192x192.png` und `icon-512x512.png` müssen existieren
 
-### App zeigt leere Seite
+### Chrome-Adressleiste wird in der App angezeigt
 
-- Service Worker hat einen veralteten Cache → Hard Refresh auf der Website
-- Prüfe in Chrome DevTools, ob die Website unter HTTPS korrekt lädt
+- `assetlinks.json` nicht erreichbar unter `/.well-known/assetlinks.json`
+- SHA-256 Fingerprint stimmt nicht mit dem Signing Key überein
+- Es kann bis zu **24 Stunden** dauern, bis Chrome die Asset Links cached
+- Prüfe mit dem [Google Asset Links Validator](https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://salary-perspective.engelportal.de&relation=delegate_permission/common.handle_all_urls)
 
-### Bubblewrap findet kein JDK
+### App zeigt leere/weiße Seite
 
-- Stelle sicher, dass `JAVA_HOME` gesetzt ist: `echo $env:JAVA_HOME`
-- JDK 11-17 wird unterstützt
+- Website unter HTTPS nicht erreichbar → im Browser testen
+- Service Worker cached veraltete Dateien → Cache leeren (DevTools → Application → Clear storage)
 
-### Keystore verloren
+### Signing Key verloren
 
-- Ohne Keystore keine Updates möglich
-- Neue App mit neuer Package ID anlegen nötig
-- **Tipp:** Google Play App Signing nutzen (Play Console verwaltet den Upload-Key)
+- Ohne den Signing Key keine Updates im Play Store möglich
+- **Vorbeugung:** `signing-key-info.txt` aus dem PWABuilder-ZIP sofort sichern
+- **Rettung:** Falls du Google Play App Signing aktiviert hast, kannst du einen neuen Upload-Key anfordern
 
 ---
 
 ## 📋 Checkliste vor dem Release
 
-- [ ] PWA läuft unter https://salary-perspective.engelportal.de
+### PWA & Deployment
+
+- [ ] `npm run build` läuft fehlerfrei
+- [ ] PWA erreichbar unter https://salary-perspective.engelportal.de
+- [ ] Icons vorhanden (`icon-192x192.png`, `icon-512x512.png`)
 - [ ] Lighthouse PWA-Score ist grün
-- [ ] Icons vorhanden (192x192, 512x512)
-- [ ] Digital Asset Links eingerichtet und erreichbar
-- [ ] `bubblewrap build` erfolgreich
-- [ ] AAB auf echtem Gerät getestet (kein Browser-Bar)
-- [ ] Keystore sicher gespeichert
-- [ ] Play Developer Account registriert und verifiziert
-- [ ] Store Listing komplett (Titel, Beschreibung, Screenshots, Icon)
+- [ ] `assetlinks.json` erreichbar unter `/.well-known/assetlinks.json`
+
+### PWABuilder
+
+- [ ] PWABuilder zeigt keine Fehler
+- [ ] AAB heruntergeladen (`app-release-bundle.aab`)
+- [ ] `signing-key-info.txt` sicher gespeichert
+
+### Play Console
+
+- [ ] Developer Account registriert und verifiziert
+- [ ] App angelegt (Name: Gehaltsperspektive)
+- [ ] Store Listing komplett (Titel, Beschreibung, Screenshots, Icon, Feature-Graphic)
 - [ ] Inhaltsbewertung (IARC) ausgefüllt
 - [ ] Datenschutzerklärung gehostet und verlinkt
 - [ ] Datensicherheits-Formular ausgefüllt
-- [ ] Interner Test bestanden
+- [ ] Werbeerklärung ausgefüllt
+- [ ] Zielgruppe & Inhalte angegeben
+
+### Testen
+
+- [ ] Interner Test gestartet
+- [ ] App auf echtem Gerät installiert und getestet
+- [ ] Keine Chrome-Adressleiste sichtbar
+- [ ] Offline-Modus funktioniert
 - [ ] Release-Notizen geschrieben
