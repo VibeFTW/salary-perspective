@@ -1,0 +1,52 @@
+---
+description: Prevent bash heredoc syntax in shell commands — user runs PowerShell on Windows
+alwaysApply: true
+---
+
+# PowerShell Shell Environment
+
+This user runs **Windows with PowerShell**. Bash-only syntax is not supported.
+
+## Forbidden: Heredoc syntax
+
+Never use bash heredoc (`<<EOF`, `<<'EOF'`) in shell commands. PowerShell does not support it.
+
+```bash
+# ❌ BAD — will fail in PowerShell
+git commit -m "$(cat <<'EOF'
+feat: add new feature
+
+Some description here.
+EOF
+)"
+```
+
+## Correct alternatives
+
+### Simple commit messages — pass directly with `-m`
+
+```powershell
+# ✅ GOOD — single-line
+git commit -m "feat: add new feature"
+```
+
+### Multi-line commit messages — use backtick-n for newlines
+
+```powershell
+# ✅ GOOD — multi-line using PowerShell line continuation
+git commit -m "feat: add new feature`n`nSome description here."
+```
+
+### Other multi-line strings — use PowerShell here-strings
+
+```powershell
+# ✅ GOOD — PowerShell here-string (note: @" must be at end of line, "@ at start)
+$body = @"
+This is a
+multi-line string
+"@
+```
+
+## General rule
+
+Always use PowerShell-compatible syntax for all shell commands. When in doubt, prefer simple inline strings over any heredoc or subshell construct.

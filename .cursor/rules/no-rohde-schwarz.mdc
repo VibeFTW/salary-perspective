@@ -1,0 +1,23 @@
+---
+description: Prohibits use of Rohde & Schwarz / rsint packages and dependencies
+alwaysApply: true
+---
+
+# No Rohde & Schwarz / rsint Dependencies
+
+Never use packages, components, libraries, or any dependencies related to **Rohde & Schwarz** or **rsint**.
+
+## Blocked identifiers
+
+Any package, namespace, or import containing these terms (case-insensitive) is prohibited:
+
+- `rsint`
+- `rohde` / `schwarz` / `Rohde & Schwarz` / `Rohde und Schwarz`
+- Packages prefixed or namespaced with `rs` that originate from Rohde & Schwarz (e.g. `RS.Something`, `@rs/...`)
+
+## Rules
+
+- Do **not** install or reference these packages in any dependency file (`package.json`, `*.csproj`, `requirements.txt`, etc.)
+- Do **not** import or use types, components, or utilities from these packages
+- If a task would require an rsint or Rohde & Schwarz dependency, flag it and suggest an alternative approach
+- **Never run `pnpm install`** or any `pnpm` command that fetches packages — the public npm registry is blocked by firewall and the rsint registry must not be used, so package installation will always fail. The user manages dependency installation manually outside the IDE.
