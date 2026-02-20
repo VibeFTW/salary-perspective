@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'icons/favicon-32x32.png', 'icons/favicon-16x16.png'],
       manifest: {
         name: 'Gehaltsperspektive',
         short_name: 'Gehaltsperspektive',

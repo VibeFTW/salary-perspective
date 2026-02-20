@@ -67,6 +67,8 @@ if (-not (Test-Path $iconsDir)) {
     New-Item -ItemType Directory -Path $iconsDir -Force | Out-Null
 }
 
+New-AppIcon -Size 16 -OutputPath (Join-Path $iconsDir "favicon-16x16.png")
+New-AppIcon -Size 32 -OutputPath (Join-Path $iconsDir "favicon-32x32.png")
 New-AppIcon -Size 192 -OutputPath (Join-Path $iconsDir "icon-192x192.png")
 New-AppIcon -Size 512 -OutputPath (Join-Path $iconsDir "icon-512x512.png")
 
