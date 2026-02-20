@@ -12,9 +12,12 @@ import {
   RotateCcw,
   Clock,
   Star,
+  Download,
 } from 'lucide-react'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 
 export function ManagePage() {
+  const { canInstall, install } = useInstallPrompt()
   const items = useStore((s) => s.items)
   const addItem = useStore((s) => s.addItem)
   const updateItem = useStore((s) => s.updateItem)
@@ -148,6 +151,16 @@ export function ManagePage() {
               Wird zur Berechnung der Arbeitszeit pro Artikel genutzt (× 52 Wochen)
             </p>
           </div>
+
+          {canInstall && (
+            <button
+              onClick={install}
+              className="mt-3 flex w-full items-center gap-2 rounded-lg border border-border/50 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Download className="h-3.5 w-3.5" />
+              App installieren
+            </button>
+          )}
         </div>
       </div>
 
