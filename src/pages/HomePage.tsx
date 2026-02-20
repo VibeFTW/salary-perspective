@@ -2,7 +2,7 @@ import { SalaryInput } from '@/components/SalaryInput'
 import { CategoryFilter } from '@/components/CategoryFilter'
 import { SortToggle } from '@/components/SortToggle'
 import { ItemList } from '@/components/ItemList'
-import { Coins } from 'lucide-react'
+import { Percent } from 'lucide-react'
 
 export function HomePage() {
   return (
@@ -11,8 +11,8 @@ export function HomePage() {
       <header className="border-b bg-background">
         <div className="mx-auto max-w-lg px-4 py-3">
           <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
-              <Coins className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-teal-300">
+              <Percent className="h-4 w-4 text-white" />
             </div>
             <h1 className="text-lg font-bold">Gehaltsperspektive</h1>
           </div>
