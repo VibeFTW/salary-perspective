@@ -105,7 +105,7 @@ export function ManagePage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-30">
+      <header className="border-b bg-background">
         <div className="mx-auto max-w-lg px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-bold">Sachen verwalten</h1>

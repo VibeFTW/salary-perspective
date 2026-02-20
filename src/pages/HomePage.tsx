@@ -8,7 +8,7 @@ export function HomePage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 sticky top-0 z-30">
+      <header className="border-b bg-background">
         <div className="mx-auto max-w-lg px-4 py-3">
           <div className="flex items-center gap-2 mb-4">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
@@ -21,7 +21,7 @@ export function HomePage() {
       </header>
 
       {/* Category filter + sort */}
-      <div className="sticky top-[calc(var(--header-h,220px))] z-20 border-b bg-background/95 backdrop-blur">
+      <div className="border-b bg-background">
         <div className="mx-auto max-w-lg px-4 py-3 space-y-2">
           <CategoryFilter />
           <SortToggle />
